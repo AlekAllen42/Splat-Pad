@@ -7,6 +7,8 @@ import { fetchSiteIcon } from './favicon'
 import { configPath, loadConfig, saveConfig } from './configStore'
 import { registerTestMode } from './testMode'
 import { registerLanguage, t } from './language'
+// the 42 Potential logo, shown in the taskbar and window corner
+import icon from '../../resources/icon.png?asset'
 
 // Windows whose UI reported unsaved changes, and ones allowed to close anyway.
 const unsaved = new WeakSet<BrowserWindow>()
@@ -19,6 +21,7 @@ function createWindow(): void {
     minWidth: 1024,
     minHeight: 680,
     title: 'Splat Pad',
+    icon,
     backgroundColor: '#f6f3ec', // avoids a white flash before the UI loads
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -81,6 +84,8 @@ function registerConfigHandlers(): void {
 }
 
 app.whenReady().then(() => {
+  // Windows: our own taskbar identity, so the 42 Potential icon is used (not Electron's)
+  if (process.platform === 'win32') app.setAppUserModelId('com.42potential.splatpad')
   registerPickers()
   registerConfigHandlers()
   registerLanguage()
