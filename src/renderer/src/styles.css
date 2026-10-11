@@ -13,6 +13,41 @@ body {
   padding: 48px;
 }
 
-.muted {
-  color: #8a8f99;
+.good {
+  color: #4ade80;
+}
+
+.bad {
+  color: #f87171;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.swatch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.swatch span {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid #ffffff33;
+}
+
+.tile {
+  width: 88px;
+  height: 88px;
+  border-radius: 14px;
+  display: flex;
+  align-items: flex-end;
+  padding: 8px;
+  box-sizing: border-box;
+  font-size: 13px;
+  font-weight: 600;
 }
