@@ -10,10 +10,15 @@ Elecrow board and must be confirmed before the firmware is written.
 
 - The device appears on the PC as a USB serial port (COM port on Windows,
   `/dev/ttyACM*` or `/dev/ttyUSB*` on Linux).
-  - TODO(hardware): does the board use the ESP32-S3's built-in USB or a
-    separate USB-to-serial chip? This decides the port name, the USB IDs
-    (VID/PID) the app looks for, and whether a baud rate matters.
-  - Baud rate: 115200 unless the board requires otherwise. TODO(hardware).
+  - Board (planned): Elecrow CrowPanel 5.0" ESP32-S3. Per Elecrow's wiki its
+    USB-C port goes through a **USB-to-serial chip to UART0**, not the
+    ESP32-S3's built-in USB (GPIO19/20, the built-in USB pins, are used by the
+    touch controller's I2C on this board). So the device shows up as a
+    generic USB serial port and is identified by the `hello` handshake.
+    TODO(hardware): the bridge chip's name and USB IDs (VID/PID), to try those
+    ports first.
+  - Baud rate: start at 115200; try 921600 once the board is here (about
+    20 s vs 3 s for a first sync of ~30 icons). TODO(hardware).
 - **Finding the device:** the app lists serial ports, tries ports whose USB
   IDs match (TODO(hardware): the IDs), then any others, by opening the port
   and sending `hello`. A port that answers with a valid `hello` within
@@ -176,9 +181,16 @@ retry it once, then treats the device as disconnected.
 
 ## 9. Open questions (TODO(hardware), to confirm with the board)
 
-1. Built-in USB vs USB-to-serial chip; the USB VID/PID to detect.
-2. Baud rate (if a USB-to-serial chip is used).
-3. RAM available for the 32 KB line buffer (PSRAM?).
+1. ~~Built-in USB vs USB-to-serial chip~~: USB-to-serial (Elecrow wiki). Still
+   need the bridge chip's VID/PID.
+2. Highest reliable baud rate (115200 baseline, try 921600).
+3. PSRAM: the wiki says both ESP32-S3-WROOM-1 **N4R2** (2 MB) and **N4R8**
+   (8 MB). 8 MB strongly preferred for an 800×480 LVGL UI; confirm the
+   variant before buying.
 4. Icon size in pixels and the image format the firmware draws.
-5. How the device reads the microSD card (pins/bus), and its file system (FAT32 expected).
+5. ~~microSD wiring~~: SPI, MOSI IO11, MISO IO13, CLK IO12, CS IO10 (Elecrow
+   wiki). File system FAT32 expected.
+7. Touch: the wiki says resistive, retailers say capacitive (example code
+   uses a GT911, a capacitive controller). The brief wants capacitive;
+   confirm the version before buying.
 6. Final model name for `hello`.
