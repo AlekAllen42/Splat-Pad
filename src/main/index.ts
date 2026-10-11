@@ -2,6 +2,7 @@ import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { existsSync } from 'fs'
 import { dirname, join } from 'path'
 import { registerPickers } from './pickers'
+import { registerIconFinder } from './iconFinder'
 import { findStarterApps, STARTER_IDS } from './starterApps'
 import { fetchSiteIcon } from './favicon'
 import { configPath, loadConfig, saveConfig } from './configStore'
@@ -13,6 +14,7 @@ import { registerDevice } from './device'
 import { HIDDEN_ARG, initAutostart, registerAutostart } from './autostart'
 import { createTray, refreshTrayMenu, showTrayHint, type TrayActions } from './tray'
 import { getPrefs, setPrefs } from './prefs'
+import { cancelRestartToUpdate, checkForUpdates, initUpdater, offerRestartIfReady, restartToUpdate } from './updater'
 
 // The app keeps running in the tray so the Splat Pad keeps working:
 // closing the window hides it; "Quit" in the tray menu really exits.
@@ -29,6 +31,7 @@ function showWindow(): void {
     if (appWindow.isMinimized()) appWindow.restore()
     appWindow.show()
     appWindow.focus()
+    offerRestartIfReady()
   }
 }
 
@@ -37,7 +40,12 @@ function quitApp(): void {
   app.quit()
 }
 
-const trayActions: TrayActions = { show: showWindow, quit: quitApp }
+const trayActions: TrayActions = {
+  show: showWindow,
+  quit: quitApp,
+  checkForUpdates: () => void checkForUpdates(true),
+  restartToUpdate
+}
 
 function createWindow(visible: boolean): void {
   const win = new BrowserWindow({
@@ -95,6 +103,7 @@ function createWindow(visible: boolean): void {
       app.quit()
     } else {
       quitting = false // Cancel: stay open
+      cancelRestartToUpdate()
     }
   })
 
@@ -141,6 +150,7 @@ if (!app.requestSingleInstanceLock()) {
     // Windows: our own taskbar identity, so the 42 Potential icon is used (not Electron's)
     if (process.platform === 'win32') app.setAppUserModelId('com.42potential.splatpad')
     registerPickers()
+    registerIconFinder()
     registerConfigHandlers()
     registerLanguage(() => refreshTrayMenu(trayActions))
     registerTestMode()
@@ -152,6 +162,7 @@ if (!app.requestSingleInstanceLock()) {
     ipcMain.handle('fetch-site-icon', (_e, url: unknown) => (typeof url === 'string' ? fetchSiteIcon(url) : null))
 
     initAutostart()
+    initUpdater({ getWindow: () => appWindow, onChange: () => refreshTrayMenu(trayActions), quit: quitApp })
     createTray(icon, trayActions)
     createWindow(!process.argv.includes(HIDDEN_ARG))
 

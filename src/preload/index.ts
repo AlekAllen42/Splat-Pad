@@ -38,6 +38,20 @@ contextBridge.exposeInMainWorld('splatPad', {
   getAutostart: () => ipcRenderer.invoke('autostart-get'),
   setAutostart: (on: boolean) => ipcRenderer.invoke('autostart-set', on),
 
+  // App updates (installed app only)
+  getAppVersion: () => ipcRenderer.invoke('app-version'),
+  getUpdateStatus: () => ipcRenderer.invoke('update-get-status'),
+  checkForUpdates: () => ipcRenderer.invoke('update-check'),
+  restartToUpdate: () => ipcRenderer.send('update-restart'),
+  onUpdateStatus: (callback: (status: unknown) => void) => {
+    const listener = (_e: Electron.IpcRendererEvent, status: unknown): void => callback(status)
+    ipcRenderer.on('update-status', listener)
+    return () => ipcRenderer.removeListener('update-status', listener)
+  },
+
+  // Better icons from a program's files (the user picks; nothing changes by itself)
+  findIcons: (target: string) => ipcRenderer.invoke('find-icons', target),
+
   // Settings file
   loadConfig: () => ipcRenderer.invoke('config-load'),
   saveConfig: (config: unknown) => ipcRenderer.invoke('config-save', config),

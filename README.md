@@ -26,6 +26,12 @@ right-click it for **Start with Windows** and **Quit**. The installed app
 starts with Windows by default, hidden in the tray (`--hidden`); this is
 never registered while developing with `npm run dev`.
 
+## Updates
+
+Installed copies update themselves from GitHub Releases; **☰ menu → Check
+for updates** checks right away. How to publish a new version:
+[docs/RELEASING.md](docs/RELEASING.md).
+
 ## Requirements
 
 - [Node.js](https://nodejs.org) 22.12 or newer (LTS recommended)
@@ -51,6 +57,7 @@ Other commands:
 | `npm run build`     | Compiles the app into `out/`                      |
 | `npm run preview`   | Runs the compiled app from `out/`                 |
 | `npm run typecheck` | Checks the TypeScript code for type errors        |
+| `npm run dist:win`  | Builds the Windows installer into `dist/`         |
 
 ## Linux: serial port permission
 

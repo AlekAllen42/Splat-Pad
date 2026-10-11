@@ -10,7 +10,15 @@ type Results = Record<string, PickedProgram | null>
 
 // Offers to link the placeholder starter apps to real programs on this PC.
 // Searching changes nothing; the user ticks what to link/remove and clicks Apply.
-export default function StarterFinder({ config, update }: { config: Config; update: ConfigUpdate }): React.JSX.Element | null {
+export default function StarterFinder({
+  config,
+  update,
+  onLinked
+}: {
+  config: Config
+  update: ConfigUpdate
+  onLinked: (targets: string[]) => void // e.g. offer sharper icons for the linked programs
+}): React.JSX.Element | null {
   const t = useT()
   const [state, setState] = useState<'idle' | 'searching' | 'results'>('idle')
   const [results, setResults] = useState<Results>({})
@@ -47,6 +55,8 @@ export default function StarterFinder({ config, update }: { config: Config; upda
       return next
     })
     setDismissed(true)
+    const linked = unlinked.map((a) => (chosen[a.id] ? results[a.id]?.path : undefined))
+    onLinked(linked.filter((p): p is string => !!p))
   }
 
   if (state !== 'results') {

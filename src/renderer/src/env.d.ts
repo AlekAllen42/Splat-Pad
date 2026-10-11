@@ -6,6 +6,8 @@ interface PickedProgram {
   icon?: string // PNG data URL
 }
 
+type UpdateStatus = import('../../shared/updates').UpdateStatus
+
 // What the preload script exposes on `window` (see src/preload/index.ts).
 interface Window {
   // Only in the pretend Splat Pad window (src/preload/pretend.ts): its "USB cable".
@@ -46,6 +48,16 @@ interface Window {
     // Start with Windows; available is false while developing (npm run dev).
     getAutostart: () => Promise<{ available: boolean; on: boolean }>
     setAutostart: (on: boolean) => Promise<{ available: boolean; on: boolean }>
+
+    // App updates. "dev" = running with npm run dev, where there's nothing to update.
+    getAppVersion: () => Promise<string>
+    getUpdateStatus: () => Promise<UpdateStatus>
+    checkForUpdates: () => Promise<UpdateStatus>
+    restartToUpdate: () => void
+    onUpdateStatus: (callback: (status: UpdateStatus) => void) => () => void
+
+    // Image data URLs found in a program's files, best first; excludes nothing (the UI filters).
+    findIcons: (target: string) => Promise<string[]>
 
     // Settings file. loadConfig: config is null when nothing has been saved yet.
     loadConfig: () => Promise<{ config: import('../../shared/config').Config | null; warning?: string }>

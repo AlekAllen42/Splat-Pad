@@ -401,6 +401,14 @@ button {
   color: var(--ink-dim);
 }
 
+/* small grey line under a menu item, e.g. the update status and version */
+.menu-note {
+  padding: 2px 12px 6px 36px;
+  font-size: 0.75rem;
+  color: var(--ink-dim);
+  max-width: 260px;
+}
+
 .menu-sep {
   height: 1px;
   margin: 6px 4px;

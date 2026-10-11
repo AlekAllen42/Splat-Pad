@@ -4,6 +4,7 @@ import type { AppThemeMode } from '../appTheme'
 import { LANGUAGES, type Language } from '../../../shared/config'
 import { stringsFor } from '../../../shared/i18n'
 import { useT } from '../i18n'
+import UpdateMenuItem from './UpdateMenuItem'
 
 interface Props {
   themeMode: AppThemeMode
@@ -157,6 +158,8 @@ export default function TopBar({
                   <span className="menu-check" />
                   {t.showSettingsFile}
                 </button>
+                <div className="menu-sep" />
+                <UpdateMenuItem />
               </div>
             )}
           </div>

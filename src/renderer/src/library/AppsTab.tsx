@@ -4,6 +4,7 @@ import { readableOn } from '../device/Tile'
 import { ColorInput } from './controls'
 import { attachSiteIcon, describeAction, makeId, TILE_COLORS, type ConfigUpdate } from './helpers'
 import StarterFinder from './StarterFinder'
+import IconFinder, { type IconRequest } from './IconFinder'
 import { useT } from '../i18n'
 
 function AppRow({
@@ -92,6 +93,9 @@ function AppRow({
 export default function AppsTab({ config, update }: { config: Config; update: ConfigUpdate }): React.JSX.Element {
   const t = useT()
   const [webForm, setWebForm] = useState<{ name: string; url: string } | null>(null)
+  const [iconRequest, setIconRequest] = useState<IconRequest | null>(null)
+  // programs on this PC that tiles open (one entry per program, even if two tiles share it)
+  const launchTargets = [...new Set(config.apps.flatMap((a) => (a.action.type === 'launch' ? [a.action.target] : [])))]
 
   const addApp = (fields: Omit<AppTile, 'id' | 'color'>): void =>
     update((c) => ({
@@ -108,7 +112,9 @@ export default function AppsTab({ config, update }: { config: Config; update: Co
 
   const addProgram = async (): Promise<void> => {
     const picked = await window.splatPad.pickProgram()
-    if (picked) addApp({ name: picked.name, icon: picked.icon, action: { type: 'launch', target: picked.path } })
+    if (!picked) return
+    addApp({ name: picked.name, icon: picked.icon, action: { type: 'launch', target: picked.path } })
+    setIconRequest({ targets: [picked.path], quiet: true }) // offer a sharper icon if the program has one
   }
 
   const addWebsite = (): void => {
@@ -149,6 +155,11 @@ export default function AppsTab({ config, update }: { config: Config; update: Co
         <button className="btn btn-small" onClick={() => setWebForm({ name: '', url: '' })}>
           {t.addWebsite}
         </button>
+        {launchTargets.length > 0 && (
+          <button className="btn btn-small" onClick={() => setIconRequest({ targets: launchTargets, quiet: false })}>
+            {t.findIcons}
+          </button>
+        )}
         <span className="lib-count">{t.appCount(config.apps.length)}</span>
       </div>
 
@@ -183,7 +194,13 @@ export default function AppsTab({ config, update }: { config: Config; update: Co
         </form>
       )}
 
-      <StarterFinder config={config} update={update} />
+      <IconFinder config={config} update={update} request={iconRequest} onDone={() => setIconRequest(null)} />
+
+      <StarterFinder
+        config={config}
+        update={update}
+        onLinked={(targets) => targets.length && setIconRequest({ targets, quiet: true })}
+      />
 
       <p className="lib-hint">{t.appsHint}</p>
 
