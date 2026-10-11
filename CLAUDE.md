@@ -8,7 +8,9 @@ shortcuts (Stream Deck-style icon tiles that continuously drift vertically
 in a loop; the user can scroll it to find an app), a few favorites, and a
 tap-to-reveal panel of
 sliders (computer brightness, volume, per-app volume, connected devices),
-plus saved presets. It plugs into the PC with one USB-C cable (power + data).
+plus saved presets. It plugs into the PC with one USB-C cable (power + data) and is always
+plugged in (no battery). Board: Elecrow CrowPanel 5.0" SKU DIS07050H-1
+(ESP32-S3-WROOM-1-N4R8, capacitive touch), ~$20.90.
 The hardware may not be in my hands yet, so build everything to work
 against a simulated device first.
 
@@ -55,6 +57,11 @@ Window layout:
 5. Auto-update plus installers (Windows installer, Linux AppImage), released
    through GitHub Releases or my own website.
 6. Firmware update button (after the firmware exists).
+
+## Agreed order of upcoming work (2026-10-11)
+1. Spanish + French language options  2. Pretend Splat Pad (simulated device)
+3. Real PC controls (brightness, per-app volume)  4. Background/tray mode
+5. Installers. Firmware gets written once the board arrives.
 
 ## Tech decisions
 - Electron + TypeScript, React + Vite via electron-vite.
