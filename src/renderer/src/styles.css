@@ -1,53 +1,367 @@
+/* Splat Pad app styles. Visual system follows 42potential.com: warm paper,
+   one orange accent, thick ink outlines with flat offset shadows, no
+   gradients or glow. Fraunces for headings, Inter for everything else. */
+
 :root {
+  --bg: #f6f3ec;
+  --surface: #fbf9f4;
+  --raised: #efe8d9;
+  --ink: #1b1711;
+  --ink-dim: #6b6456;
+  --ink-faint: #a39b8c;
+  --line: rgba(27, 23, 17, 0.14);
+  --edge: #1b1711; /* outlines */
+  --shadow-color: #1b1711;
+
+  --accent: #e2562c;
+  --accent-ink: #fbf3ea;
+  --accent-soft: rgba(226, 86, 44, 0.12);
+
+  --radius-lg: 0.9rem;
+  --radius: 0.6rem;
+  --radius-sm: 0.4rem;
+
+  --shadow: 5px 5px 0 var(--shadow-color);
+  --shadow-sm: 3px 3px 0 var(--shadow-color);
+  --shadow-press: 1px 1px 0 var(--shadow-color);
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --bar-h: 60px;
+
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --bg: #15120e;
+  --surface: #1d1a15;
+  --raised: #26211a;
+  --ink: #f1eadf;
+  --ink-dim: #b0a796;
+  --ink-faint: #7d7566;
+  --line: rgba(241, 234, 223, 0.12);
+  --edge: rgba(241, 234, 223, 0.55);
+  --shadow-color: #000;
+
+  --accent: #ec6a40;
+  --accent-ink: #1b1711;
+  --accent-soft: rgba(236, 106, 64, 0.16);
+
   color-scheme: dark;
-  font-family: system-ui, 'Segoe UI', sans-serif;
-  background: #1b1d22;
-  color: #e8e9ec;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+html,
+body,
+#root {
+  height: 100%;
 }
 
 body {
   margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  overflow: hidden;
 }
 
-.placeholder {
-  padding: 48px;
+button {
+  font: inherit;
+  color: inherit;
 }
 
-.good {
-  color: #4ade80;
+/* ---------- Buttons ---------- */
+
+.btn {
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.45rem 1rem;
+  background: var(--surface);
+  border: 2px solid var(--edge);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition:
+    transform 0.12s var(--ease),
+    box-shadow 0.12s var(--ease);
 }
 
-.bad {
-  color: #f87171;
+.btn:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--shadow-color);
 }
 
-.row {
+.btn:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-press);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.icon-btn {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.icon-btn:hover,
+.icon-btn[aria-expanded='true'] {
+  border-color: var(--edge);
+  background: var(--surface);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Pop-out top bar ---------- */
+
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  transform: translateY(calc(-1 * var(--bar-h)));
+  transition: transform 0.28s var(--ease);
+}
+
+.topbar.is-open {
+  transform: translateY(0);
+}
+
+/* invisible strip under the bar so hovering the top edge opens it */
+.topbar::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 10px;
+}
+
+.topbar-inner {
+  height: var(--bar-h);
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: var(--bg);
+  border-bottom: 2px solid var(--edge);
+  box-shadow: 0 3px 0 var(--accent); /* the orange line that peeks out when closed */
+}
+
+.topbar-left,
+.topbar-right {
+  display: flex;
+  align-items: center;
   gap: 12px;
 }
 
-.swatch {
+.brand-logo {
+  width: 32px;
+  height: 32px;
+}
+
+.brand-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.45rem;
+  letter-spacing: -0.01em;
+}
+
+.topbar-tab {
+  position: absolute;
+  top: calc(100% + 3px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px 4px;
+  background: var(--bg);
+  border: 2px solid var(--edge);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  cursor: pointer;
+  transition: opacity 0.2s var(--ease);
+}
+
+/* tucked away while the bar is open; tapping outside the bar closes it */
+.topbar.is-open .topbar-tab {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.topbar-tab img {
+  width: 16px;
+  height: 16px;
+}
+
+.topbar-chevron {
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+}
+
+.hamburger,
+.hamburger::before,
+.hamburger::after {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--ink);
+  border-radius: 2px;
+  position: relative;
+}
+
+.hamburger::before,
+.hamburger::after {
+  content: '';
+  position: absolute;
+  left: 0;
+}
+
+.hamburger::before {
+  top: -6px;
+}
+
+.hamburger::after {
+  top: 6px;
+}
+
+/* ---------- Hamburger menu ---------- */
+
+.menu-anchor {
+  position: relative;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 220px;
+  padding: 6px;
+  background: var(--surface);
+  border: 2px solid var(--edge);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.menu-label {
+  padding: 6px 10px 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.menu-item {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 8px 10px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  cursor: pointer;
 }
 
-.swatch span {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  border: 1px solid #ffffff33;
+.menu-item:hover {
+  background: var(--accent-soft);
 }
 
-.tile {
-  width: 88px;
-  height: 88px;
-  border-radius: 14px;
+.menu-check {
+  width: 14px;
+  color: var(--accent);
+  font-size: 0.7rem;
+}
+
+/* ---------- Four-panel layout ---------- */
+
+.app {
+  height: 100%;
+}
+
+.quadrants {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 18px;
+  padding: 34px 20px 20px; /* top padding leaves room for the bar's tab */
+}
+
+.panel {
+  min-width: 0;
+  min-height: 0;
   display: flex;
-  align-items: flex-end;
-  padding: 8px;
-  box-sizing: border-box;
-  font-size: 13px;
+  flex-direction: column;
+  background: var(--surface);
+  border: 2px solid var(--edge);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.panel-header h2 {
+  margin: 0;
+  font-family: var(--font-display);
   font-weight: 600;
+  font-size: 1.2rem;
+  letter-spacing: -0.01em;
+}
+
+.panel-header p {
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+  color: var(--ink-dim);
+}
+
+.panel-body {
+  flex: 1;
+  min-height: 0;
+  padding: 14px 16px;
+  overflow: auto;
+}
+
+.placeholder {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  border: 2px dashed var(--line);
+  border-radius: var(--radius);
+  color: var(--ink-faint);
+  font-size: 0.9rem;
 }

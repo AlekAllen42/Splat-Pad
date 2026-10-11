@@ -1,4 +1,4 @@
-// The Control Pad settings file: everything a user can customize.
+// The Splat Pad settings file: everything a user can customize.
 // The same JSON is saved on the PC and will later be copied to the device's
 // microSD card. Field-by-field documentation lives in docs/CONFIG.md.
 

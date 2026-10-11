@@ -1,8 +1,9 @@
 {
-  "name": "control-pad",
+  "name": "splat-pad",
+  "productName": "Splat Pad",
   "version": "0.1.0",
   "private": true,
-  "description": "Desktop companion app for the Control Pad desk device",
+  "description": "Desktop companion app for the Splat Pad desk device",
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
@@ -11,6 +12,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json"
   },
   "dependencies": {
+    "@fontsource/fraunces": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },

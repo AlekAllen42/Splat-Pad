@@ -7,7 +7,8 @@ function createWindow(): void {
     height: 800,
     minWidth: 1024,
     minHeight: 680,
-    title: 'Control Pad',
+    title: 'Splat Pad',
+    backgroundColor: '#f6f3ec', // avoids a white flash before the UI loads
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       // Keep the UI isolated from Node.js; it only gets what preload exposes.

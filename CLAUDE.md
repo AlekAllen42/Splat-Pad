@@ -1,7 +1,7 @@
-# Control Pad: desktop companion app
+# Splat Pad: desktop companion app
 
 ## The product
-Control Pad is a hardware product I'm designing: a Stream Deck-sized desk
+Splat Pad is a hardware product I'm designing: a Stream Deck-sized desk
 device with a 5-inch capacitive touchscreen (Elecrow 5" ESP32-S3 board,
 800x480, microSD slot). The screen shows a clock, a carousel of app
 shortcuts (Stream Deck-style icon tiles that continuously drift vertically
@@ -21,10 +21,23 @@ is the product; the app is how users personalize it. Two jobs:
 2. Background agent (system tray): talks to the device over USB serial and
    performs actions on the PC (set volume or brightness, launch apps).
 
-## UI (see docs/sketch.jpg)
-App window with: live preview of the device screen; theme color swatches;
-an "adjust position" panel with tabs for apps / view / sliders; an app list;
-an "Update" firmware button; Discard and Save buttons.
+## UI
+Branding matches https://42potential.com (company site; co-founder owns
+myleskerschner.com): warm paper background, one orange accent #e2562c,
+thick ink outlines with flat offset shadows, no gradients/glow, Fraunces
+for headings, Inter for body, 42 Potential logo. App has light + dark modes.
+
+Window layout:
+- Pop-out top bar (slim strip; slides open on hover/tap): logo, "Splat Pad",
+  hamburger menu (light/dark/system), Update firmware, Discard, Save.
+- Top left: live screen, what the device shows right now (animated).
+- Top right: layout editor, drag/resize/move screen pieces on a grid.
+- Bottom left: AI panel (Claude) to create things that don't exist yet;
+  user can opt to send creations to the company for review. Real AI must go
+  through our website's server (never ship an API key in the app); until
+  then, pretend responses.
+- Bottom right: library, add apps (with icons from the PC), clock,
+  sliders, presets, device background/theme colors, quantities.
 
 ## Phases (do one at a time)
 1. App only, no hardware: scaffold, on-screen preview of the device screen,

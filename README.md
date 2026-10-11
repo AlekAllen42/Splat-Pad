@@ -1,6 +1,6 @@
-# Control Pad: desktop companion app
+# Splat Pad: desktop companion app
 
-Configurator and background agent for the Control Pad desk device
+Configurator and background agent for the Splat Pad desk device
 (5" touchscreen, connects to the PC over one USB-C cable).
 
 Status: **Phase 1, early scaffold.** The app runs on its own and shows an

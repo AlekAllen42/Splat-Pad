@@ -1,47 +1,28 @@
-import { DEFAULT_CONFIG, validateConfig } from '../../shared/config'
+import TopBar from './components/TopBar'
+import Panel from './components/Panel'
+import { useAppTheme } from './appTheme'
 
-// Temporary screen for Step 2: shows the default settings so you can see
-// what's customizable. Step 3 replaces this with the device preview.
 export default function App(): React.JSX.Element {
-  const check = validateConfig(DEFAULT_CONFIG)
-  const c = DEFAULT_CONFIG
+  const [themeMode, setThemeMode] = useAppTheme()
 
   return (
-    <main className="placeholder">
-      <h1>Control Pad</h1>
-      <p className={check.ok ? 'good' : 'bad'}>
-        Default settings: {check.ok ? 'valid' : check.errors.join('; ')}
-      </p>
+    <div className="app">
+      <TopBar themeMode={themeMode} onThemeModeChange={setThemeMode} />
 
-      <h2>Theme</h2>
-      <div className="row">
-        {Object.entries(c.theme).map(([name, color]) => (
-          <div key={name} className="swatch">
-            <span style={{ background: color }} />
-            {name}
-          </div>
-        ))}
-      </div>
-
-      <h2>Apps ({c.apps.length})</h2>
-      <div className="row">
-        {c.apps.map((app) => (
-          <div key={app.id} className="tile" style={{ background: app.color }}>
-            {app.name}
-          </div>
-        ))}
-      </div>
-
-      <h2>Sliders</h2>
-      <p>{c.sliders.map((s) => s.label).join(', ')}</p>
-
-      <h2>Presets</h2>
-      <p>{c.presets.map((p) => p.name).join(', ')}</p>
-
-      <h2>Carousel</h2>
-      <p>
-        {c.carousel.columns} columns, drifting {c.carousel.direction} at {c.carousel.speed} px/s
-      </p>
-    </main>
+      <main className="quadrants">
+        <Panel title="Live screen" subtitle="What your Splat Pad shows right now">
+          <div className="placeholder">Device preview comes in step 2</div>
+        </Panel>
+        <Panel title="Layout" subtitle="Drag, resize and arrange pieces of the screen">
+          <div className="placeholder">Layout editor comes in step 3</div>
+        </Panel>
+        <Panel title="Create with AI" subtitle="Describe something new for your Splat Pad">
+          <div className="placeholder">AI panel comes in step 5</div>
+        </Panel>
+        <Panel title="Library" subtitle="Apps, widgets, presets and colors">
+          <div className="placeholder">Library comes in step 4</div>
+        </Panel>
+      </main>
+    </div>
   )
 }

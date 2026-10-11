@@ -2,7 +2,7 @@
 
 // What the preload script exposes on `window` (see src/preload/index.ts).
 interface Window {
-  controlPad: {
+  splatPad: {
     platform: string
   }
 }

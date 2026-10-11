@@ -1,6 +1,6 @@
 # Settings file (config.json)
 
-Everything a user can customize about their Control Pad is stored in one
+Everything a user can customize about their Splat Pad is stored in one
 JSON file. The app reads and writes it; later the same file is copied to
 the device's microSD card so the device can show the user's layout.
 
