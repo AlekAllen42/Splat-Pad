@@ -457,70 +457,15 @@ button {
   }
 }
 
-/* ---------- Center star and the circle cut out of the panels ----------
-   Each panel's inner corner gets a smooth quarter-circle bite (a CSS mask),
-   with an outline drawn along the curve. Together they leave a round hole
-   in the middle of the window where the star sits. */
+/* ---------- Center star ----------
+   One circle sits over the four panels' inner corners, filled with the page
+   color and outlined like the panels, so the panel edges meet it cleanly and
+   it reads as a round hole with the star inside. */
 
 .quadrants {
   --gap: 18px;
-  --hole: 42px; /* radius of the circle */
   gap: var(--gap);
   position: relative;
-}
-
-.panel-tl,
-.panel-tr,
-.panel-bl,
-.panel-br {
-  /* where the window's center is, relative to this panel */
-  --cx: calc(100% + var(--gap) / 2);
-  --cy: calc(100% + var(--gap) / 2);
-  position: relative;
-  -webkit-mask: radial-gradient(circle var(--hole) at var(--cx) var(--cy), transparent calc(var(--hole) - 0.5px), #000 var(--hole));
-  mask: radial-gradient(circle var(--hole) at var(--cx) var(--cy), transparent calc(var(--hole) - 0.5px), #000 var(--hole));
-  /* the mask would cut off a normal box-shadow, so .panel-shadow draws it instead */
-  box-shadow: none;
-}
-
-/* A copy of the panel's shape, shifted down-right behind it: the flat shadow,
-   including along the curved cut. */
-.panel-shadow {
-  border-radius: var(--radius-lg);
-  background: var(--shadow-color);
-  transform: translate(3px, 3px);
-  pointer-events: none;
-}
-
-.panel-shadow::after {
-  display: none;
-}
-
-.panel-tr,
-.panel-br {
-  --cx: calc(var(--gap) / -2);
-}
-
-.panel-bl,
-.panel-br {
-  --cy: calc(var(--gap) / -2);
-}
-
-/* the outline along the curved cut */
-.panel-tl::after,
-.panel-tr::after,
-.panel-bl::after,
-.panel-br::after {
-  content: '';
-  position: absolute;
-  left: var(--cx);
-  top: var(--cy);
-  width: calc(var(--hole) * 2 + 4px);
-  height: calc(var(--hole) * 2 + 4px);
-  transform: translate(-50%, -50%);
-  border: 2px solid var(--edge);
-  border-radius: 50%;
-  pointer-events: none;
 }
 
 .center-star {
@@ -528,20 +473,20 @@ button {
   grid-area: 1 / 1 / 3 / 3;
   place-self: center;
   z-index: 5;
-  width: 72px;
-  height: 72px;
+  width: 60px;
+  height: 60px;
   display: grid;
   place-items: center;
   padding: 0;
-  background: none;
-  border: none;
+  background: var(--bg);
+  border: 2px solid var(--edge);
   border-radius: 50%;
   cursor: pointer;
 }
 
 .center-star svg {
-  width: 50px;
-  height: 50px;
+  width: 30px;
+  height: 30px;
   overflow: visible;
   transition: transform 0.8s var(--ease);
 }
@@ -561,6 +506,11 @@ button {
 
 .center-star:hover .center-star-arms line {
   stroke: color-mix(in srgb, var(--accent) 88%, #fff);
+}
+
+/* keep the Library heading clear of the circle at any window size */
+.panel-br .panel-header {
+  padding-left: 24px;
 }
 
 /* test mode on: the star glows */
