@@ -184,13 +184,13 @@ retry it once, then treats the device as disconnected.
 1. ~~Built-in USB vs USB-to-serial chip~~: USB-to-serial (Elecrow wiki). Still
    need the bridge chip's VID/PID.
 2. Highest reliable baud rate (115200 baseline, try 921600).
-3. PSRAM: the wiki says both ESP32-S3-WROOM-1 **N4R2** (2 MB) and **N4R8**
-   (8 MB). 8 MB strongly preferred for an 800×480 LVGL UI; confirm the
-   variant before buying.
+3. ~~PSRAM~~: the product listing (SKU DIS07050H-1) specifies
+   ESP32-S3-WROOM-1-**N4R8** (4 MB flash, 8 MB PSRAM); plenty for the 32 KB
+   line buffer and an 800×480 LVGL UI. (Elecrow's wiki also mentions N4R2;
+   check the module marking when the board arrives.)
 4. Icon size in pixels and the image format the firmware draws.
 5. ~~microSD wiring~~: SPI, MOSI IO11, MISO IO13, CLK IO12, CS IO10 (Elecrow
    wiki). File system FAT32 expected.
-7. Touch: the wiki says resistive, retailers say capacitive (example code
-   uses a GT911, a capacitive controller). The brief wants capacitive;
-   confirm the version before buying.
+7. ~~Touch~~: the product listing (SKU DIS07050H-1) says capacitive, matching
+   the brief. (The wiki says resistive; likely an older version.)
 6. Final model name for `hello`.
