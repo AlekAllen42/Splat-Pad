@@ -365,3 +365,94 @@ button {
   color: var(--ink-faint);
   font-size: 0.9rem;
 }
+
+/* ---------- Saving ---------- */
+
+.app-loading {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--ink-dim);
+}
+
+.unsaved-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-left: 6px;
+  vertical-align: middle;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  box-sizing: content-box;
+}
+
+.btn-primary .unsaved-dot {
+  background: var(--accent-ink);
+  border-color: var(--accent);
+}
+
+.topbar-tab .unsaved-dot {
+  margin: 0 0 0 2px;
+}
+
+.unsaved-label {
+  font-size: 0.82rem;
+  color: var(--ink-dim);
+}
+
+.menu-sep {
+  height: 1px;
+  margin: 6px 4px;
+  background: var(--line);
+}
+
+.notice {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  z-index: 200;
+  transform: translateX(-50%);
+  max-width: min(560px, calc(100vw - 40px));
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  background: var(--surface);
+  border: 2px solid var(--edge);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  animation: notice-in 0.2s var(--ease);
+}
+
+.notice ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.notice .icon-btn {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.notice-ok {
+  border-color: var(--success-edge, #2f6b46);
+}
+
+.notice-error,
+.notice-warning {
+  border-left: 6px solid #b3273f;
+}
+
+.notice-warning {
+  border-left-color: #a9790a;
+}
+
+@keyframes notice-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+}

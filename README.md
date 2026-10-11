@@ -3,8 +3,20 @@
 Configurator and background agent for the Splat Pad desk device
 (5" touchscreen, connects to the PC over one USB-C cable).
 
-Status: **Phase 1, early scaffold.** The app runs on its own and shows an
-on-screen preview of the device; it doesn't connect to the device yet.
+Status: **Phase 1 complete.** Design your Splat Pad's screen, apps, sliders,
+presets and colors, with a live preview. The app doesn't connect to the
+device yet (Phase 2).
+
+## Where your settings are saved
+
+Click **Save** (or press `Ctrl+S`). Settings are stored in one file:
+
+- Windows: `%APPDATA%splat-padconfig.json`
+- Linux: `~/.config/splat-pad/config.json`
+
+Open it from the app with **☰ menu → Show settings file**. If the file is
+ever damaged, the app starts from the defaults and keeps the damaged copy
+next to it as `config.broken-<number>.json`.
 
 ## Requirements
 

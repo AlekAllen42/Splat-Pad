@@ -5,6 +5,9 @@ import type { AppThemeMode } from '../appTheme'
 interface Props {
   themeMode: AppThemeMode
   onThemeModeChange: (mode: AppThemeMode) => void
+  unsaved: boolean
+  onSave: () => void
+  onDiscard: () => void
 }
 
 const THEME_OPTIONS: { mode: AppThemeMode; label: string }[] = [
@@ -17,7 +20,7 @@ const THEME_OPTIONS: { mode: AppThemeMode; label: string }[] = [
 const CLOSE_DELAY_MS = 450
 
 // A slim strip across the top that slides open on hover (mouse) or tap (touch).
-export default function TopBar({ themeMode, onThemeModeChange }: Props): React.JSX.Element {
+export default function TopBar({ themeMode, onThemeModeChange, unsaved, onSave, onDiscard }: Props): React.JSX.Element {
   const [open, setOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const barRef = useRef<HTMLDivElement>(null)
@@ -88,6 +91,18 @@ export default function TopBar({ themeMode, onThemeModeChange }: Props): React.J
                     {opt.label}
                   </button>
                 ))}
+                <div className="menu-sep" />
+                <button
+                  role="menuitem"
+                  className="menu-item"
+                  onClick={() => {
+                    window.splatPad.showConfigFile()
+                    setMenuOpen(false)
+                  }}
+                >
+                  <span className="menu-check" />
+                  Show settings file
+                </button>
               </div>
             )}
           </div>
@@ -96,15 +111,17 @@ export default function TopBar({ themeMode, onThemeModeChange }: Props): React.J
         </div>
 
         <div className="topbar-right">
-          {/* Wired up in later steps: Update = Phase 6, Discard/Save = step 6. */}
+          {/* Update is wired up in Phase 6, once the firmware exists. */}
           <button className="btn" tabIndex={open ? 0 : -1} disabled title="Available once firmware exists">
             Update
           </button>
-          <button className="btn" tabIndex={open ? 0 : -1}>
+          {unsaved && <span className="unsaved-label">Unsaved changes</span>}
+          <button className="btn" tabIndex={open ? 0 : -1} disabled={!unsaved} onClick={onDiscard}>
             Discard
           </button>
-          <button className="btn btn-primary" tabIndex={open ? 0 : -1}>
+          <button className="btn btn-primary" tabIndex={open ? 0 : -1} onClick={onSave} title="Save (Ctrl+S)">
             Save
+            {unsaved && <span className="unsaved-dot" aria-hidden />}
           </button>
         </div>
       </div>
@@ -112,11 +129,12 @@ export default function TopBar({ themeMode, onThemeModeChange }: Props): React.J
       {/* The always-visible tab you hover or tap to open the bar. */}
       <button
         className="topbar-tab"
-        aria-label="Show toolbar"
+        aria-label={unsaved ? 'Show toolbar (unsaved changes)' : 'Show toolbar'}
         tabIndex={open ? -1 : 0}
         onClick={() => setOpen(true)}
       >
         <img src={logo} alt="" />
+        {unsaved && <span className="unsaved-dot" title="Unsaved changes" />}
         <span className="topbar-chevron">▾</span>
       </button>
     </div>

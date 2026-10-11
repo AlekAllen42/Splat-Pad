@@ -1,21 +1,30 @@
-import { useState } from 'react'
 import TopBar from './components/TopBar'
 import Panel from './components/Panel'
+import NoticeToast from './components/NoticeToast'
 import DeviceScreen from './device/DeviceScreen'
 import LayoutEditor from './editor/LayoutEditor'
 import Library from './library/Library'
 import AiPanel from './ai/AiPanel'
 import { useAppTheme } from './appTheme'
-import { DEFAULT_CONFIG, type Config } from '../../shared/config'
+import { useSettings } from './settings'
+import { DEFAULT_CONFIG } from '../../shared/config'
 
 export default function App(): React.JSX.Element {
   const [themeMode, setThemeMode] = useAppTheme()
-  // The settings being edited. Save (step 6) writes them to disk.
-  const [config, setConfig] = useState<Config>(DEFAULT_CONFIG)
+  const settings = useSettings()
+  const { config, update } = settings
+
+  if (!settings.ready) return <div className="app-loading">Loading your Splat Pad…</div>
 
   return (
     <div className="app">
-      <TopBar themeMode={themeMode} onThemeModeChange={setThemeMode} />
+      <TopBar
+        themeMode={themeMode}
+        onThemeModeChange={setThemeMode}
+        unsaved={settings.unsaved}
+        onSave={() => void settings.save()}
+        onDiscard={settings.discard}
+      />
 
       <main className="quadrants">
         <Panel title="Live screen" subtitle="What your Splat Pad shows right now">
@@ -25,17 +34,19 @@ export default function App(): React.JSX.Element {
           <LayoutEditor
             layout={config.layout}
             theme={config.theme}
-            onChange={(layout) => setConfig((c) => ({ ...c, layout }))}
-            onReset={() => setConfig((c) => ({ ...c, layout: DEFAULT_CONFIG.layout }))}
+            onChange={(layout) => update((c) => ({ ...c, layout }))}
+            onReset={() => update((c) => ({ ...c, layout: DEFAULT_CONFIG.layout }))}
           />
         </Panel>
         <Panel title="Create with AI" subtitle="Describe something new for your Splat Pad">
-          <AiPanel config={config} update={setConfig} />
+          <AiPanel config={config} update={update} />
         </Panel>
         <Panel title="Library" subtitle="Apps, pieces, controls, colors and options">
-          <Library config={config} update={setConfig} />
+          <Library config={config} update={update} />
         </Panel>
       </main>
+
+      <NoticeToast notice={settings.notice} onClose={settings.clearNotice} />
     </div>
   )
 }

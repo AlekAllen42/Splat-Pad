@@ -17,5 +17,13 @@ interface Window {
     findStarterApps: (ids: string[]) => Promise<Record<string, PickedProgram | null>>
     // A website's icon as a data URL, or null if none could be found.
     fetchSiteIcon: (url: string) => Promise<string | null>
+
+    // Settings file. loadConfig: config is null when nothing has been saved yet.
+    loadConfig: () => Promise<{ config: import('../../shared/config').Config | null; warning?: string }>
+    saveConfig: (config: unknown) => Promise<{ ok: true } | { ok: false; errors: string[] }>
+    setUnsaved: (value: boolean) => void
+    showConfigFile: () => void
+    closeWindow: () => void
+    onSaveThenClose: (callback: () => void) => () => void
   }
 }

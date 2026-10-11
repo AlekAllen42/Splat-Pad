@@ -1,8 +1,14 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'path'
+import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
+import { existsSync } from 'fs'
+import { dirname, join } from 'path'
 import { registerPickers } from './pickers'
 import { findStarterApps, STARTER_IDS } from './starterApps'
 import { fetchSiteIcon } from './favicon'
+import { configPath, loadConfig, saveConfig } from './configStore'
+
+// Windows whose UI reported unsaved changes, and ones allowed to close anyway.
+const unsaved = new WeakSet<BrowserWindow>()
+const allowClose = new WeakSet<BrowserWindow>()
 
 function createWindow(): void {
   const win = new BrowserWindow({
@@ -20,6 +26,27 @@ function createWindow(): void {
     }
   })
 
+  // Closing with unsaved changes asks first.
+  win.on('close', (e) => {
+    if (!unsaved.has(win) || allowClose.has(win)) return
+    e.preventDefault()
+    const choice = dialog.showMessageBoxSync(win, {
+      type: 'question',
+      buttons: ['Save', 'Don’t save', 'Cancel'],
+      defaultId: 0,
+      cancelId: 2,
+      title: 'Splat Pad',
+      message: 'Save your changes before closing?',
+      detail: 'If you don’t save, your changes since the last save will be lost.'
+    })
+    if (choice === 0) {
+      win.webContents.send('save-then-close') // the UI saves, then calls close-window
+    } else if (choice === 1) {
+      allowClose.add(win)
+      win.close()
+    }
+  })
+
   // In development electron-vite serves the UI with live reload;
   // in a built app we load the bundled HTML file.
   if (process.env['ELECTRON_RENDERER_URL']) {
@@ -29,8 +56,31 @@ function createWindow(): void {
   }
 }
 
+function registerConfigHandlers(): void {
+  ipcMain.handle('config-load', () => loadConfig())
+  ipcMain.handle('config-save', (_e, config: unknown) => saveConfig(config))
+  ipcMain.on('set-unsaved', (e, value: unknown) => {
+    const win = BrowserWindow.fromWebContents(e.sender)
+    if (!win) return
+    if (value === true) unsaved.add(win)
+    else unsaved.delete(win)
+  })
+  ipcMain.on('close-window', (e) => {
+    const win = BrowserWindow.fromWebContents(e.sender)
+    if (!win) return
+    allowClose.add(win)
+    win.close()
+  })
+  ipcMain.on('show-config-file', () => {
+    const file = configPath()
+    if (existsSync(file)) shell.showItemInFolder(file)
+    else void shell.openPath(dirname(file)) // not saved yet: open the folder
+  })
+}
+
 app.whenReady().then(() => {
   registerPickers()
+  registerConfigHandlers()
   ipcMain.handle('find-starter-apps', (_e, ids: unknown) =>
     findStarterApps(Array.isArray(ids) ? ids.filter((id): id is string => STARTER_IDS.includes(id)) : [])
   )
