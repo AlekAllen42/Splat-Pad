@@ -13,7 +13,8 @@ The hardware may not be in my hands yet, so build everything to work
 against a simulated device first.
 
 ## What we're building now
-The desktop companion app for Windows and Linux (macOS later). The device
+The desktop companion app for Windows and Linux (macOS later, after a
+Kickstarter funds the Apple Developer membership; don't build Mac releases yet). The device
 is the product; the app is how users personalize it. Two jobs:
 1. Configurator: edit layout, colors, apps, sliders, presets, with a live
    preview of the device screen. Once the device is connected (Phase 2+),
