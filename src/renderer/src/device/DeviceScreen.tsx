@@ -3,12 +3,14 @@ import { SCREEN_HEIGHT, SCREEN_WIDTH, type AppTile, type Config, type Widget } f
 import Carousel from './Carousel'
 import { Clock, ControlsButton, Favorites, Presets, SliderPanel } from './widgets'
 import { useFitScale } from './useFitScale'
+import { runApp, runSlider } from './testRunner'
 import './device.css'
 
 const BEZEL = 22 // frame around the screen, in device pixels (preview only)
 
 // A working stand-in for the Splat Pad's 800x480 screen.
-export default function DeviceScreen({ config }: { config: Config }): React.JSX.Element {
+// testMode: taps really open apps/websites and change the volume on this PC.
+export default function DeviceScreen({ config, testMode }: { config: Config; testMode: boolean }): React.JSX.Element {
   const [fitRef, scale] = useFitScale(SCREEN_WIDTH + BEZEL * 2, SCREEN_HEIGHT + BEZEL * 2)
   const [panelOpen, setPanelOpen] = useState(false)
   const [sliderValues, setSliderValues] = useState<Record<string, number>>({})
@@ -17,15 +19,39 @@ export default function DeviceScreen({ config }: { config: Config }): React.JSX.
   const [toast, setToast] = useState<string | null>(null)
   const toastTimer = useRef<number | undefined>(undefined)
 
-  // Tapping an app flashes the tile; the "Opening ..." message is optional (Library setting).
+  const showToast = (text: string, ms = 1400): void => {
+    window.clearTimeout(toastTimer.current)
+    setToast(text)
+    toastTimer.current = window.setTimeout(() => setToast(null), ms)
+  }
+
+  // Tapping an app flashes the tile. In test mode it really runs; otherwise
+  // the "Opening ..." message is optional (Library setting).
   const tapApp = (app: AppTile): void => {
     setPressedId(app.id)
     window.setTimeout(() => setPressedId(null), 160)
-    if (!config.behavior.showOpenMessage) return
-    window.clearTimeout(toastTimer.current)
-    setToast(`Opening ${app.name}`)
-    toastTimer.current = window.setTimeout(() => setToast(null), 1400)
+    if (testMode) {
+      void runApp(app, config).then((messages) => showToast(messages.join(' · '), 2600))
+    } else if (config.behavior.showOpenMessage) {
+      showToast(`Opening ${app.name}`)
+    }
   }
+
+  const setSlider = (id: string, value: number): void => {
+    setSliderValues((vals) => ({ ...vals, [id]: value }))
+    const slider = config.sliders.find((s) => s.id === id)
+    if (testMode && slider) void runSlider(slider, value).then((msg) => showToast(msg))
+  }
+
+  // Entering test mode: start the volume sliders from the PC's real volume.
+  useEffect(() => {
+    if (!testMode) return
+    void window.splatPad.getVolume().then((volume) => {
+      if (volume === null) return
+      const ids = config.sliders.filter((s) => s.kind === 'masterVolume').map((s) => s.id)
+      setSliderValues((vals) => ({ ...vals, ...Object.fromEntries(ids.map((id) => [id, volume])) }))
+    })
+  }, [testMode]) // only when test mode is switched on, not on every settings change
 
   useEffect(() => () => window.clearTimeout(toastTimer.current), [])
 
@@ -51,7 +77,7 @@ export default function DeviceScreen({ config }: { config: Config }): React.JSX.
             activeId={activePreset}
             onApply={(p) => {
               setActivePreset(p.id)
-              setSliderValues((v) => ({ ...v, ...p.values }))
+              for (const [id, value] of Object.entries(p.values)) setSlider(id, value)
             }}
           />
         )
@@ -61,7 +87,12 @@ export default function DeviceScreen({ config }: { config: Config }): React.JSX.
   }
 
   return (
-    <div ref={fitRef} className="device-fit">
+    <div ref={fitRef} className={`device-fit ${testMode ? 'is-testing' : ''}`}>
+      {testMode && (
+        <div className="test-badge" role="status">
+          TEST MODE · taps run on this PC
+        </div>
+      )}
       <div
         className="device"
         style={{
@@ -100,7 +131,7 @@ export default function DeviceScreen({ config }: { config: Config }): React.JSX.
             values={sliderValues}
             onChange={(id, v) => {
               setActivePreset(null)
-              setSliderValues((vals) => ({ ...vals, [id]: v }))
+              setSlider(id, v)
             }}
             onClose={() => setPanelOpen(false)}
           />

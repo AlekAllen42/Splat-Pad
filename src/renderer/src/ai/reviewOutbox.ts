@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { Creation } from './mockAssistant'
 
-// Creations and ideas the user chose to send to the Splat team for review.
+// Creations and ideas the user chose to send to 42 Potential for review.
 // They wait here (on this computer) until sending is connected to our website.
 export interface ReviewItem {
   id: string

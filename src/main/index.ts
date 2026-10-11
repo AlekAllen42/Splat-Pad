@@ -5,6 +5,7 @@ import { registerPickers } from './pickers'
 import { findStarterApps, STARTER_IDS } from './starterApps'
 import { fetchSiteIcon } from './favicon'
 import { configPath, loadConfig, saveConfig } from './configStore'
+import { registerTestMode } from './testMode'
 
 // Windows whose UI reported unsaved changes, and ones allowed to close anyway.
 const unsaved = new WeakSet<BrowserWindow>()
@@ -81,6 +82,7 @@ function registerConfigHandlers(): void {
 app.whenReady().then(() => {
   registerPickers()
   registerConfigHandlers()
+  registerTestMode()
   ipcMain.handle('find-starter-apps', (_e, ids: unknown) =>
     findStarterApps(Array.isArray(ids) ? ids.filter((id): id is string => STARTER_IDS.includes(id)) : [])
   )

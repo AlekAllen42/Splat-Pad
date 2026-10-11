@@ -18,6 +18,11 @@ interface Window {
     // A website's icon as a data URL, or null if none could be found.
     fetchSiteIcon: (url: string) => Promise<string | null>
 
+    // Test mode. testOpen kind: "launch" (program) or "url" (website).
+    testOpen: (kind: "launch" | "url", target: string) => Promise<{ ok: boolean; error?: string }>
+    getVolume: () => Promise<number | null>
+    setVolume: (value: number) => Promise<boolean>
+
     // Settings file. loadConfig: config is null when nothing has been saved yet.
     loadConfig: () => Promise<{ config: import('../../shared/config').Config | null; warning?: string }>
     saveConfig: (config: unknown) => Promise<{ ok: true } | { ok: false; errors: string[] }>

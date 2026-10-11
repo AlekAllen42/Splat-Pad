@@ -456,3 +456,151 @@ button {
     transform: translate(-50%, 8px);
   }
 }
+
+/* ---------- Center star and the circle cut out of the panels ----------
+   Each panel's inner corner gets a smooth quarter-circle bite (a CSS mask),
+   with an outline drawn along the curve. Together they leave a round hole
+   in the middle of the window where the star sits. */
+
+.quadrants {
+  --gap: 18px;
+  --hole: 42px; /* radius of the circle */
+  gap: var(--gap);
+  position: relative;
+}
+
+.panel-tl,
+.panel-tr,
+.panel-bl,
+.panel-br {
+  /* where the window's center is, relative to this panel */
+  --cx: calc(100% + var(--gap) / 2);
+  --cy: calc(100% + var(--gap) / 2);
+  position: relative;
+  -webkit-mask: radial-gradient(circle var(--hole) at var(--cx) var(--cy), transparent calc(var(--hole) - 0.5px), #000 var(--hole));
+  mask: radial-gradient(circle var(--hole) at var(--cx) var(--cy), transparent calc(var(--hole) - 0.5px), #000 var(--hole));
+  /* the mask would cut off a normal box-shadow, so .panel-shadow draws it instead */
+  box-shadow: none;
+}
+
+/* A copy of the panel's shape, shifted down-right behind it: the flat shadow,
+   including along the curved cut. */
+.panel-shadow {
+  border-radius: var(--radius-lg);
+  background: var(--shadow-color);
+  transform: translate(3px, 3px);
+  pointer-events: none;
+}
+
+.panel-shadow::after {
+  display: none;
+}
+
+.panel-tr,
+.panel-br {
+  --cx: calc(var(--gap) / -2);
+}
+
+.panel-bl,
+.panel-br {
+  --cy: calc(var(--gap) / -2);
+}
+
+/* the outline along the curved cut */
+.panel-tl::after,
+.panel-tr::after,
+.panel-bl::after,
+.panel-br::after {
+  content: '';
+  position: absolute;
+  left: var(--cx);
+  top: var(--cy);
+  width: calc(var(--hole) * 2 + 4px);
+  height: calc(var(--hole) * 2 + 4px);
+  transform: translate(-50%, -50%);
+  border: 2px solid var(--edge);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.center-star {
+  /* spans the whole grid, then centers itself on the gap crossing */
+  grid-area: 1 / 1 / 3 / 3;
+  place-self: center;
+  z-index: 5;
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.center-star svg {
+  width: 50px;
+  height: 50px;
+  overflow: visible;
+  transition: transform 0.8s var(--ease);
+}
+
+.center-star line {
+  stroke-width: 9;
+  stroke-linecap: round;
+}
+
+.center-star-arms line {
+  stroke: var(--accent);
+}
+
+.center-star-shadow line {
+  stroke: var(--shadow-color);
+}
+
+.center-star:hover .center-star-arms line {
+  stroke: color-mix(in srgb, var(--accent) 88%, #fff);
+}
+
+/* test mode on: the star glows */
+.center-star.is-active svg {
+  filter: drop-shadow(0 0 6px var(--accent)) drop-shadow(0 0 14px var(--accent));
+  animation: star-glow 1.8s ease-in-out infinite;
+}
+
+@keyframes star-glow {
+  50% {
+    filter: drop-shadow(0 0 3px var(--accent)) drop-shadow(0 0 8px var(--accent));
+  }
+}
+
+/* ---------- Test mode label on the live screen ---------- */
+
+.device-fit.is-testing .device {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 34px;
+}
+
+.test-badge {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  z-index: 2;
+  transform: translateX(-50%);
+  padding: 3px 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* fixed spots, so the star (which spans the whole grid) doesn't push panels around */
+.panel-tl { grid-area: 1 / 1; }
+.panel-tr { grid-area: 1 / 2; }
+.panel-bl { grid-area: 2 / 1; }
+.panel-br { grid-area: 2 / 2; }

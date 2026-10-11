@@ -126,7 +126,7 @@ export function respond(input: string, config: Config): Reply {
 
   return {
     message:
-      'I can’t build that with what Splat Pad can do yet. I can make buttons that open apps and websites and set sliders, presets, and color themes. Want to send this idea to the Splat team? They review ideas for new features.',
+      'I can’t build that with what Splat Pad can do yet. I can make buttons that open apps and websites and set sliders, presets, and color themes. Want to send this idea to 42 Potential? They review ideas and may add them as features or presets for everyone.',
     idea: true
   }
 }

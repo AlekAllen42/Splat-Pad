@@ -34,9 +34,13 @@ Window layout:
 - Top left: live screen, what the device shows right now (animated).
 - Top right: layout editor, drag/resize/move screen pieces on a grid.
 - Bottom left: AI panel (Claude) to create things that don't exist yet;
-  user can opt to send creations to the company for review. Real AI must go
+  user can opt to send creations to 42 Potential for review (wording: "send
+  to 42 Potential", never "Splat") to become presets for everyone. Real AI must go
   through our website's server (never ship an API key in the app); until
   then, pretend responses.
+- Center: orange star in a circle cut from the four panels' inner corners;
+  spins on hover, click toggles Test mode (taps in the live screen really
+  open apps/websites and set master volume on this PC; glows while on).
 - Bottom right: library, add apps (with icons from the PC), clock,
   sliders, presets, device background/theme colors, quantities, and
   optional extras (e.g. "Opening <app>" message on tap, off by default).

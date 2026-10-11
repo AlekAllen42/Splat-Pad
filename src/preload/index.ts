@@ -9,6 +9,11 @@ contextBridge.exposeInMainWorld('splatPad', {
   findStarterApps: (ids: string[]) => ipcRenderer.invoke('find-starter-apps', ids),
   fetchSiteIcon: (url: string) => ipcRenderer.invoke('fetch-site-icon', url),
 
+  // Test mode: really open things / change volume on this PC
+  testOpen: (kind: string, target: string) => ipcRenderer.invoke('test-open', kind, target),
+  getVolume: () => ipcRenderer.invoke('test-get-volume'),
+  setVolume: (value: number) => ipcRenderer.invoke('test-set-volume', value),
+
   // Settings file
   loadConfig: () => ipcRenderer.invoke('config-load'),
   saveConfig: (config: unknown) => ipcRenderer.invoke('config-save', config),

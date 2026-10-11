@@ -94,13 +94,13 @@ function ReplyCard({
           <CreationPreview creation={reply.creation} config={config} />
           {added ? (
             <p className="ai-done">
-              ✓ Added to your Splat Pad{sent ? ' · waiting to send for review' : ''}
+              ✓ Added to your Splat Pad{sent ? ' · waiting to send to 42 Potential' : ''}
             </p>
           ) : (
             <div className="ai-card-actions">
               <label className="ai-review">
                 <input type="checkbox" checked={review} onChange={(e) => setReview(e.target.checked)} />
-                Also send to Splat for review
+                Send to 42 Potential for review, so it could become a preset for everyone
               </label>
               <button
                 className="btn btn-small btn-primary"
@@ -122,7 +122,7 @@ function ReplyCard({
 
       {reply.idea &&
         (sent ? (
-          <p className="ai-done">✓ Idea saved, waiting to send for review</p>
+          <p className="ai-done">✓ Idea saved, waiting to send to 42 Potential</p>
         ) : (
           <button
             className="btn btn-small"
@@ -131,7 +131,7 @@ function ReplyCard({
               setSent(true)
             }}
           >
-            Send idea for review
+            Send idea to 42 Potential for review
           </button>
         ))}
     </div>
@@ -242,7 +242,7 @@ export default function AiPanel({ config, update }: { config: Config; update: Co
 
       {outbox.length > 0 && (
         <p className="ai-outbox">
-          {outbox.length} {outbox.length === 1 ? 'item is' : 'items are'} waiting to send to Splat for review. Sending
+          {outbox.length} {outbox.length === 1 ? 'item is' : 'items are'} waiting to send to 42 Potential for review. Sending
           starts once the app is connected to 42potential.com.
         </p>
       )}
