@@ -1,4 +1,4 @@
-import type { AppTile, TileStyle } from '../../../shared/config'
+import type { AppTile, TileShape, TileStyle } from '../../../shared/config'
 
 // Black or white text, whichever is easier to read on the given color.
 export function readableOn(hex: string): string {
@@ -10,15 +10,30 @@ export function readableOn(hex: string): string {
 
 interface Props {
   app: AppTile
-  size: number
+  size: number // height; also the width of a square or circle
+  shape?: TileShape
+  gap?: number // space between columns; a rectangle is two squares plus one gap wide
   style?: TileStyle
-  boxed?: boolean // false: no colored box, just the image/letter; the tap area stays the same square
+  boxed?: boolean // false: no colored box, just the image/letter; the tap area stays the same
   pressed?: boolean
 }
 
+// Width of a tile of this shape.
+export const tileWidth = (shape: TileShape, size: number, gap: number): number =>
+  shape === 'rectangle' ? size * 2 + gap : size
+
 // One app button, Stream Deck style: the app's image or first letter, and
-// (depending on the style) its name, on a colored square unless boxes are off.
-export default function Tile({ app, size, style = 'imageName', boxed = true, pressed }: Props): React.JSX.Element {
+// (depending on the style) its name, on a colored square, circle or
+// double-wide rectangle, unless boxes are off.
+export default function Tile({
+  app,
+  size,
+  shape = 'square',
+  gap = 12,
+  style = 'imageName',
+  boxed = true,
+  pressed
+}: Props): React.JSX.Element {
   const useImage = style !== 'letterName' && !!app.icon
   const showName = !(useImage && style === 'image')
   // Without a box the image can be bigger, since nothing surrounds it.
@@ -26,9 +41,9 @@ export default function Tile({ app, size, style = 'imageName', boxed = true, pre
 
   return (
     <div
-      className={`dev-tile ${boxed ? '' : 'is-bare'} ${pressed ? 'is-pressed' : ''} ${showName ? 'has-name' : ''}`}
+      className={`dev-tile dev-tile-${shape} ${boxed ? '' : 'is-bare'} ${pressed ? 'is-pressed' : ''} ${showName ? 'has-name' : ''}`}
       style={{
-        width: size,
+        width: tileWidth(shape, size, gap),
         height: size,
         // boxless tiles sit on the screen background, so use the screen's text color
         ...(boxed ? { background: app.color, color: readableOn(app.color) } : {})

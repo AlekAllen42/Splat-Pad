@@ -597,3 +597,10 @@ input[type='checkbox'] {
 .lib-starter-row em {
   color: var(--ink-dim);
 }
+
+.lib-shape {
+  width: auto;
+  flex-shrink: 0;
+  padding: 4px 6px;
+  font-size: 0.8rem;
+}

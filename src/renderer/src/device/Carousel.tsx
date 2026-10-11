@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
-import type { AppTile, CarouselSettings, TileStyle } from '../../../shared/config'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { tileShapeOf, type AppTile, type CarouselSettings, type TileSettings } from '../../../shared/config'
 import Tile from './Tile'
+import { packRows } from './packRows'
 
 interface Props {
   apps: AppTile[]
-  tileStyle: TileStyle
-  tileBoxes: boolean
+  tiles: TileSettings
   settings: CarouselSettings
   width: number
   height: number
@@ -18,11 +18,15 @@ const TAP_SLOP = 6 // a press that moves less than this (screen px) counts as a 
 
 // App tiles in an endless loop that slowly drifts. Drag or use the mouse wheel
 // to scroll; drifting pauses and resumes after `resumeDelayMs`.
-export default function Carousel({ apps, tileStyle, tileBoxes, settings, width, height, scale, onTap }: Props): React.JSX.Element {
+export default function Carousel({ apps, tiles, settings, width, height, scale, onTap }: Props): React.JSX.Element {
   const { columns, speed, direction, resumeDelayMs } = settings
   const tile = Math.max(20, Math.floor((width - GAP * (columns + 1)) / columns))
-  const rows = Math.ceil(apps.length / columns)
-  const loopHeight = rows * (tile + GAP) // height of one full copy of the tiles
+  // every row full: the list wraps around to fill gaps (see packRows)
+  const rows = useMemo(
+    () => packRows(apps, (a) => (tileShapeOf(a, tiles) === 'rectangle' ? 2 : 1), columns),
+    [apps, tiles, columns]
+  )
+  const loopHeight = rows.length * (tile + GAP) // height of one full copy of the tiles
   // enough copies to always cover the visible area while wrapping around
   const copies = loopHeight > 0 ? Math.ceil(height / loopHeight) + 1 : 0
 
@@ -118,11 +122,25 @@ export default function Carousel({ apps, tileStyle, tileBoxes, settings, width, 
               padding: `${GAP / 2}px ${GAP}px`
             }}
           >
-            {apps.map((app) => (
-              <div key={app.id} data-app-id={app.id}>
-                <Tile app={app} size={tile} style={tileStyle} boxed={tileBoxes} pressed={pressedId === app.id} />
-              </div>
-            ))}
+            {rows.flatMap((row, r) =>
+              row.map((slot, i) =>
+                slot.item ? (
+                  <div key={`${r}-${i}`} data-app-id={slot.item.id} style={{ gridColumn: `span ${slot.span}` }}>
+                    <Tile
+                      app={slot.item}
+                      size={tile}
+                      gap={GAP}
+                      shape={tileShapeOf(slot.item, tiles)}
+                      style={tiles.style}
+                      boxed={tiles.showBoxes}
+                      pressed={pressedId === slot.item.id}
+                    />
+                  </div>
+                ) : (
+                  <div key={`${r}-${i}`} style={{ gridColumn: `span ${slot.span}` }} />
+                )
+              )
+            )}
           </div>
         ))}
       </div>

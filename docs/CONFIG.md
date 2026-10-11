@@ -52,6 +52,11 @@ display's color depth once the firmware exists.
 
 ## carousel
 
+Every row of the carousel is always full: when the apps don't fill the last
+row, the loop continues into the start of the list (7 apps in 2 columns are
+shown as 14 tiles). A double-wide tile that doesn't fit at the end of a row
+moves to the next row and a single tile fills the spot.
+
 App tiles in a loop that slowly drifts up (or down). The user scrolls it to
 find an app; it pauses while they scroll and resumes drifting afterwards.
 
@@ -68,6 +73,7 @@ find an app; it pauses while they scroll and resumes drifting afterwards.
 | ------- | ------------------------------------------------------------------- | ------------- |
 | `style` | `"imageName"` (image + name), `"image"` (image only), `"letterName"` (letter + name) | `"imageName"` |
 
+| `shape` | `"square"`, `"circle"`, `"rectangle"` (two columns wide), or `"mixed"` (each app uses its own `shape`) | `"square"` |
 | `showBoxes` | `true` (colored box behind each app) or `false` (just the image or letter; the tap area stays the same square) | `true` |
 
 Apps without an `icon` always show their first letter and name.
@@ -100,6 +106,7 @@ Each tile:
 | `id`     | Short unique name, e.g. `"spotify"`. Used by favorites.              |
 | `name`   | Label shown on the tile                                              |
 | `color`  | Tile background color                                               |
+| `shape`  | Optional: `"square"`, `"circle"` or `"rectangle"`; used when `tiles.shape` is `"mixed"` (default square) |
 | `icon`   | Optional image. Filled in automatically from the program (Add program, starter-app finder) or the website (Add website), or chosen by the user. Stored as a data URL for now. Without one, the tile shows the first letter of the name. |
 | `action` | What the PC does when the tile is tapped (see below)                 |
 

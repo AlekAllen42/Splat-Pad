@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Config } from '../../../shared/config'
+import { tileShapeOf, type Config } from '../../../shared/config'
 import Tile from '../device/Tile'
 import { attachSiteIcon, describeAction, type ConfigUpdate } from '../library/helpers'
 import { applyCreation, respond, type Creation, type Reply } from './mockAssistant'
@@ -29,7 +29,13 @@ function CreationPreview({ creation, config }: { creation: Creation; config: Con
     case 'button':
       return (
         <div className="ai-preview">
-          <Tile app={{ ...creation.app, id: 'preview' }} size={64} style={config.tiles.style} boxed={config.tiles.showBoxes} />
+          <Tile
+            app={{ ...creation.app, id: 'preview' }}
+            size={64}
+            shape={tileShapeOf({ ...creation.app, id: 'preview' }, config.tiles)}
+            style={config.tiles.style}
+            boxed={config.tiles.showBoxes}
+          />
           <div>
             <strong>{creation.app.name}</strong>
             <span>{describeAction(creation.app.action, config)}</span>

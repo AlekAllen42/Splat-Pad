@@ -369,3 +369,25 @@
   /* a soft lift so images read as buttons without a box */
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25));
 }
+
+/* ---------- Tile shapes ---------- */
+
+.dev-tile-circle {
+  border-radius: 50%;
+}
+
+/* names sit higher and narrower inside a circle so they don't hit the curve */
+.dev-tile-circle .dev-tile-name {
+  bottom: 14%;
+  left: 18%;
+  right: 18%;
+}
+
+.dev-tile-circle.has-name {
+  padding-bottom: 18%;
+}
+
+.dev-tile-rectangle .dev-tile-name {
+  left: 8%;
+  right: 8%;
+}

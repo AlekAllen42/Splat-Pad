@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { AppTile, ClockSettings, Preset, Slider, TileStyle } from '../../../shared/config'
+import { tileShapeOf, type AppTile, type ClockSettings, type Preset, type Slider, type TileSettings } from '../../../shared/config'
 import Tile from './Tile'
 
 // ---------- Clock ----------
@@ -54,30 +54,37 @@ export function Clock({ settings, w, h }: { settings: ClockSettings; w: number; 
 
 export function Favorites({
   apps,
-  tileStyle,
-  tileBoxes,
+  tiles,
   w,
   h,
   pressedId,
   onPress
 }: {
   apps: AppTile[]
-  tileStyle: TileStyle
-  tileBoxes: boolean
+  tiles: TileSettings
   w: number
   h: number
   pressedId: string | null
   onPress: (app: AppTile) => void
 }): React.JSX.Element {
   const gap = 12
-  const n = Math.max(1, apps.length)
-  const size = Math.max(20, Math.floor(Math.min(h, (w - gap * (n - 1)) / n)))
+  // a double-wide tile counts as two
+  const units = Math.max(1, apps.reduce((n, a) => n + (tileShapeOf(a, tiles) === 'rectangle' ? 2 : 1), 0))
+  const size = Math.max(20, Math.floor(Math.min(h, (w - gap * (units - 1)) / units)))
   return (
     <div className="dev-favorites" style={{ gap }}>
       {apps.length === 0 && <span className="dev-empty">No favorites yet</span>}
       {apps.map((app) => (
         <button key={app.id} className="dev-plain" onClick={() => onPress(app)}>
-          <Tile app={app} size={size} style={tileStyle} boxed={tileBoxes} pressed={pressedId === app.id} />
+          <Tile
+            app={app}
+            size={size}
+            gap={gap}
+            shape={tileShapeOf(app, tiles)}
+            style={tiles.style}
+            boxed={tiles.showBoxes}
+            pressed={pressedId === app.id}
+          />
         </button>
       ))}
     </div>

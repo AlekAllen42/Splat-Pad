@@ -48,6 +48,7 @@ export interface AppTile {
   id: string
   name: string
   color: HexColor // tile background
+  shape?: TileShape // used when tiles.shape is "mixed"; default square
   icon?: string // image file name, e.g. "icons/spotify.png"; first letter of name shown if missing
   action: AppAction
 }
@@ -88,8 +89,12 @@ export interface Widget {
 // How app tiles are drawn. Apps without an image always show their letter.
 export type TileStyle = 'imageName' | 'image' | 'letterName'
 
+// Rectangle = double-wide: two columns wide, one tile tall.
+export type TileShape = 'square' | 'circle' | 'rectangle'
+
 export interface TileSettings {
   style: TileStyle
+  shape: TileShape | 'mixed' // mixed: each app uses its own shape
   showBoxes: boolean // false: just the image (or letter), same tap area, no colored box
 }
 
@@ -122,7 +127,7 @@ export const DEFAULT_CONFIG: Config = {
   },
   clock: { format: '12h', showSeconds: false, showDate: true },
   carousel: { columns: 2, speed: 18, direction: 'up', resumeDelayMs: 2000 },
-  tiles: { style: 'imageName', showBoxes: true },
+  tiles: { style: 'imageName', shape: 'square', showBoxes: true },
   behavior: { showOpenMessage: false },
   layout: [
     { id: 'carousel', type: 'carousel', x: 20, y: 20, w: 340, h: 440 },
@@ -151,6 +156,10 @@ export const DEFAULT_CONFIG: Config = {
     { id: 'night', name: 'Night', values: { volume: 35, brightness: 20, 'spotify-vol': 50 } }
   ]
 }
+
+// The shape an app's tile is drawn with.
+export const tileShapeOf = (app: AppTile, tiles: TileSettings): TileShape =>
+  tiles.shape === 'mixed' ? (app.shape ?? 'square') : tiles.shape
 
 // ---------------------------------------------------------------------------
 // Upgrading older files: settings added in later versions of the app get
@@ -285,6 +294,7 @@ export function validateConfig(raw: unknown): ValidationResult {
   const tiles = isObj(raw.tiles) ? raw.tiles : (err('tiles', 'missing'), {})
   oneOf(tiles.style, 'tiles.style', ['imageName', 'image', 'letterName'])
   bool(tiles.showBoxes, 'tiles.showBoxes')
+  oneOf(tiles.shape, 'tiles.shape', ['square', 'circle', 'rectangle', 'mixed'])
 
   const layout = list(raw.layout, 'layout')
   uniqueIds(layout, 'layout')
@@ -322,6 +332,7 @@ export function validateConfig(raw: unknown): ValidationResult {
     str(a.name, `${p}.name`)
     color(a.color, `${p}.color`)
     if (a.icon !== undefined) str(a.icon, `${p}.icon`)
+    if (a.shape !== undefined) oneOf(a.shape, `${p}.shape`, ['square', 'circle', 'rectangle'])
     const action = isObj(a.action) ? a.action : (err(`${p}.action`, 'missing'), {})
     oneOf(action.type, `${p}.action.type`, ['launch', 'url', 'macro', 'none'])
     if (action.type === 'launch' || action.type === 'url') str(action.target, `${p}.action.target`)

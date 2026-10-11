@@ -25,6 +25,20 @@ export default function OptionsTab({ config, update }: { config: Config; update:
             onChange={(style) => update((c) => ({ ...c, tiles: { ...c.tiles, style } }))}
           />
         </Row>
+        <Row label="Shape">
+          <Segmented
+            value={config.tiles.shape}
+            options={[
+              { value: 'square', label: 'Square' },
+              { value: 'circle', label: 'Circle' },
+              { value: 'rectangle', label: 'Rectangle' },
+              { value: 'mixed', label: 'Mixed' }
+            ]}
+            onChange={(shape) => update((c) => ({ ...c, tiles: { ...c.tiles, shape } }))}
+          />
+        </Row>
+        {config.tiles.shape === 'mixed' && <p className="lib-hint">Pick each app’s shape in the Apps tab.</p>}
+        {config.tiles.shape === 'rectangle' && <p className="lib-hint">Rectangles are two columns wide.</p>}
         <Row label="Tile boxes">
           <Segmented
             value={config.tiles.showBoxes ? 'show' : 'hide'}

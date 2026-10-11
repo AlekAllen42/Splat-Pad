@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { removeApp, type AppTile, type Config } from '../../../shared/config'
+import { removeApp, type AppTile, type Config, type TileShape } from '../../../shared/config'
 import { readableOn } from '../device/Tile'
 import { ColorInput } from './controls'
 import { attachSiteIcon, describeAction, makeId, TILE_COLORS, type ConfigUpdate } from './helpers'
@@ -51,6 +51,19 @@ function AppRow({
           {target}
         </span>
       </div>
+      {config.tiles.shape === 'mixed' && (
+        <select
+          className="lib-input lib-shape"
+          value={app.shape ?? 'square'}
+          aria-label={`Shape of ${app.name}`}
+          title="Tile shape"
+          onChange={(e) => onChange({ ...app, shape: e.target.value as TileShape })}
+        >
+          <option value="square">■ Square</option>
+          <option value="circle">● Circle</option>
+          <option value="rectangle">▬ Wide</option>
+        </select>
+      )}
       <ColorInput label="Tile color" value={app.color} onChange={(color) => onChange({ ...app, color })} />
       <button
         className={`lib-icon-btn lib-star ${favorite ? 'is-on' : ''}`}
