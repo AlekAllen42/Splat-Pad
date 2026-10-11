@@ -81,6 +81,7 @@ export default function OptionsTab({ config, update }: { config: Config; update:
         </Row>
         <Toggle label="Show seconds" checked={clock.showSeconds} onChange={(showSeconds) => setClock({ showSeconds })} />
         <Toggle label="Show date" checked={clock.showDate} onChange={(showDate) => setClock({ showDate })} />
+        <Toggle label="Show 42 Potential logo" checked={clock.showLogo} onChange={(showLogo) => setClock({ showLogo })} />
       </section>
 
       <section className="lib-section">

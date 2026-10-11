@@ -46,6 +46,7 @@ display's color depth once the firmware exists.
 | `format`      | `"12h"` or `"24h"`|
 | `showSeconds` | `true` / `false`  |
 | `showDate`    | `true` / `false`  |
+| `showLogo`    | `true` / `false`: small 42 Potential logo above AM/PM (same spot in 24-hour mode) |
 | `timeColor`   | Optional color for the time digits; default: theme `text` |
 | `dateColor`   | Optional color for the date; default: theme `text`, dimmed |
 | `ampmColor`   | Optional color for AM/PM; default: theme `accent` |

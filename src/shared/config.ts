@@ -17,6 +17,7 @@ export interface ClockSettings {
   format: '12h' | '24h'
   showSeconds: boolean
   showDate: boolean
+  showLogo: boolean // small 42 Potential logo above AM/PM (same spot in 24-hour mode)
   // Optional colors; when missing the clock uses the theme:
   // time -> theme text, date -> theme text (dimmed), AM/PM -> theme accent.
   timeColor?: HexColor
@@ -125,7 +126,7 @@ export const DEFAULT_CONFIG: Config = {
     accent: '#e2562c',
     text: '#1b1711'
   },
-  clock: { format: '12h', showSeconds: false, showDate: true },
+  clock: { format: '12h', showSeconds: false, showDate: true, showLogo: true },
   carousel: { columns: 2, speed: 18, direction: 'up', resumeDelayMs: 2000 },
   tiles: { style: 'imageName', shape: 'square', showBoxes: true },
   behavior: { showOpenMessage: false },
@@ -277,6 +278,7 @@ export function validateConfig(raw: unknown): ValidationResult {
   oneOf(clock.format, 'clock.format', ['12h', '24h'])
   bool(clock.showSeconds, 'clock.showSeconds')
   bool(clock.showDate, 'clock.showDate')
+  bool(clock.showLogo, 'clock.showLogo')
   for (const key of ['timeColor', 'dateColor', 'ampmColor'] as const)
     if (clock[key] !== undefined) color(clock[key], `clock.${key}`)
 

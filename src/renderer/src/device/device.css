@@ -149,9 +149,29 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* logo stacked above AM/PM, to the right of the digits */
+.dev-clock-time {
+  display: flex;
+  align-items: flex-end;
+}
+
+.dev-clock-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.05em;
+  margin-left: 0.12em;
+  padding-bottom: 0.08em; /* line AM/PM up with the bottom of the digits */
+}
+
+.dev-clock-logo {
+  width: 0.3em;
+  height: 0.3em;
+}
+
 .dev-clock-ampm {
   font-size: 0.26em;
-  margin-left: 0.15em;
+  line-height: 1;
   letter-spacing: 0.04em;
   color: var(--d-accent);
 }

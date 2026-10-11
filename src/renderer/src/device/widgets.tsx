@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { tileShapeOf, type AppTile, type ClockSettings, type Preset, type Slider, type TileSettings } from '../../../shared/config'
 import Tile from './Tile'
+// TODO(hardware): the device will need this logo as an image file on the microSD card.
+import logo from '../assets/logo.svg'
 
 // ---------- Clock ----------
 
@@ -24,16 +26,25 @@ export function Clock({ settings, w, h }: { settings: ClockSettings; w: number; 
   const date = now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })
 
   // Size the digits to fit the box: limited by both height and width.
-  const chars = time.length + (ampm ? 1.2 : 0)
+  const hasSide = !!ampm || settings.showLogo // the column right of the digits
+  const chars = time.length + (hasSide ? 1.2 : 0)
   const timeSize = Math.min(h * (settings.showDate ? 0.6 : 0.8), w / (chars * 0.56))
 
   return (
     <div className="dev-clock">
       <div className="dev-clock-time" style={{ fontSize: timeSize, color: settings.timeColor }}>
-        {time}
-        {ampm && (
-          <span className="dev-clock-ampm" style={{ color: settings.ampmColor }}>
-            {ampm}
+        <span>{time}</span>
+        {hasSide && (
+          <span className="dev-clock-side">
+            {settings.showLogo && <img className="dev-clock-logo" src={logo} alt="42 Potential" draggable={false} />}
+            {/* in 24-hour mode an invisible "PM" keeps the logo in the same spot */}
+            <span
+              className="dev-clock-ampm"
+              style={{ color: settings.ampmColor, visibility: ampm ? 'visible' : 'hidden' }}
+              aria-hidden={!ampm}
+            >
+              {ampm || 'PM'}
+            </span>
           </span>
         )}
       </div>
