@@ -37,7 +37,8 @@ Window layout:
   through our website's server (never ship an API key in the app); until
   then, pretend responses.
 - Bottom right: library, add apps (with icons from the PC), clock,
-  sliders, presets, device background/theme colors, quantities.
+  sliders, presets, device background/theme colors, quantities, and
+  optional extras (e.g. "Opening <app>" message on tap, off by default).
 
 ## Phases (do one at a time)
 1. App only, no hardware: scaffold, on-screen preview of the device screen,

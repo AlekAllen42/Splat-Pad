@@ -33,12 +33,13 @@ export default function DeviceScreen({ config }: { config: Config }): React.JSX.
   const [toast, setToast] = useState<string | null>(null)
   const toastTimer = useRef<number | undefined>(undefined)
 
-  // Tapping an app flashes the tile and shows what would happen on the PC.
+  // Tapping an app flashes the tile; the "Opening ..." message is optional (Library setting).
   const tapApp = (app: AppTile): void => {
     setPressedId(app.id)
     window.setTimeout(() => setPressedId(null), 160)
+    if (!config.behavior.showOpenMessage) return
     window.clearTimeout(toastTimer.current)
-    setToast(`Open ${app.name}`)
+    setToast(`Opening ${app.name}`)
     toastTimer.current = window.setTimeout(() => setToast(null), 1400)
   }
 

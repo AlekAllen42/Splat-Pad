@@ -73,11 +73,16 @@ export interface Widget {
   h: number
 }
 
+export interface BehaviorSettings {
+  showOpenMessage: boolean // brief "Opening Spotify" message when an app is tapped
+}
+
 export interface Config {
   version: number
   theme: Theme
   clock: ClockSettings
   carousel: CarouselSettings
+  behavior: BehaviorSettings
   layout: Widget[] // where each piece sits on the screen
   apps: AppTile[]
   favorites: string[] // app ids, shown in the favorites row
@@ -96,6 +101,7 @@ export const DEFAULT_CONFIG: Config = {
   },
   clock: { format: '12h', showSeconds: false, showDate: true },
   carousel: { columns: 2, speed: 18, direction: 'up', resumeDelayMs: 2000 },
+  behavior: { showOpenMessage: false },
   layout: [
     { id: 'carousel', type: 'carousel', x: 20, y: 20, w: 340, h: 440 },
     { id: 'clock', type: 'clock', x: 400, y: 20, w: 380, h: 280 },
@@ -198,6 +204,9 @@ export function validateConfig(raw: unknown): ValidationResult {
   num(carousel.speed, 'carousel.speed', 0, 200)
   oneOf(carousel.direction, 'carousel.direction', ['up', 'down'])
   num(carousel.resumeDelayMs, 'carousel.resumeDelayMs', 0, 60000)
+
+  const behavior = isObj(raw.behavior) ? raw.behavior : (err('behavior', 'missing'), {})
+  bool(behavior.showOpenMessage, 'behavior.showOpenMessage')
 
   const layout = list(raw.layout, 'layout')
   uniqueIds(layout, 'layout')

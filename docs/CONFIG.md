@@ -16,6 +16,7 @@ broken files with readable error messages).
 | `theme`     | Screen colors                                                 |
 | `clock`     | Clock display options                                         |
 | `carousel`  | How the moving app carousel behaves                           |
+| `behavior`  | Optional extras, switched on from the Library                 |
 | `layout`    | Where each piece sits on the screen                           |
 | `apps`      | The app tiles in the carousel                                 |
 | `favorites` | App ids pinned to the favorites row                           |
@@ -56,6 +57,12 @@ find an app; it pauses while they scroll and resumes drifting afterwards.
 | `speed`         | Drift speed in pixels per second; `0` = no drifting       | 0 to 200   |
 | `direction`     | `"up"` or `"down"`                                        |            |
 | `resumeDelayMs` | Wait after the user stops scrolling before drifting again | 0 to 60000 |
+
+## behavior
+
+| Field             | Meaning                                                       | Default |
+| ----------------- | ------------------------------------------------------------- | ------- |
+| `showOpenMessage` | Show a brief "Opening Spotify" message when an app is tapped  | `false` |
 
 ## layout
 
