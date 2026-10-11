@@ -26,10 +26,17 @@ export interface CarouselSettings {
   resumeDelayMs: number // how long after the user stops scrolling before drifting resumes
 }
 
+// One step of a custom button ("macro"), done in order.
+export type MacroStep =
+  | { type: 'openApp'; appId: string } // do whatever that app tile does
+  | { type: 'url'; target: string }
+  | { type: 'setSlider'; sliderId: string; value: number } // 0..100
+
 // What happens on the PC when an app tile is tapped (performed in Phase 3).
 export type AppAction =
   | { type: 'launch'; target: string } // program path or command
   | { type: 'url'; target: string } // website to open
+  | { type: 'macro'; steps: MacroStep[] } // several things at once
   | { type: 'none' }
 
 export interface AppTile {
@@ -131,6 +138,38 @@ export const DEFAULT_CONFIG: Config = {
 }
 
 // ---------------------------------------------------------------------------
+// Keeping references tidy: removing an app or slider also removes every
+// custom-button step, favorite and preset value that pointed at it.
+
+export function removeApp(c: Config, appId: string): Config {
+  return {
+    ...c,
+    apps: c.apps.filter((a) => a.id !== appId).map((a) => withoutSteps(a, (s) => s.type === 'openApp' && s.appId === appId)),
+    favorites: c.favorites.filter((f) => f !== appId)
+  }
+}
+
+export function removeSlider(c: Config, sliderId: string): Config {
+  return {
+    ...c,
+    sliders: c.sliders.filter((s) => s.id !== sliderId),
+    apps: c.apps.map((a) => withoutSteps(a, (s) => s.type === 'setSlider' && s.sliderId === sliderId)),
+    presets: c.presets.map((p) => {
+      const values = { ...p.values }
+      delete values[sliderId]
+      return { ...p, values }
+    })
+  }
+}
+
+// A custom button left with no steps becomes a button that does nothing.
+function withoutSteps(app: AppTile, drop: (s: MacroStep) => boolean): AppTile {
+  if (app.action.type !== 'macro') return app
+  const steps = app.action.steps.filter((s) => !drop(s))
+  return { ...app, action: steps.length ? { type: 'macro', steps } : { type: 'none' } }
+}
+
+// ---------------------------------------------------------------------------
 // Validation: checks a loaded file before the app uses it, so a hand-edited
 // or corrupted file produces clear messages instead of a crash.
 
@@ -225,6 +264,17 @@ export function validateConfig(raw: unknown): ValidationResult {
       err(p, `sticks out past the bottom edge of the screen (${SCREEN_HEIGHT}px)`)
   })
 
+  // Sliders come before apps because custom buttons can refer to them.
+  const sliders = list(raw.sliders, 'sliders')
+  const sliderIds = uniqueIds(sliders, 'sliders')
+  sliders.forEach((s, i) => {
+    const p = `sliders[${i}]`
+    if (!isObj(s)) return err(p, 'must be an object')
+    oneOf(s.kind, `${p}.kind`, ['masterVolume', 'brightness', 'appVolume', 'device'])
+    str(s.label, `${p}.label`)
+    if (s.kind === 'appVolume' || s.kind === 'device') str(s.target, `${p}.target`)
+  })
+
   const apps = list(raw.apps, 'apps')
   const appIds = uniqueIds(apps, 'apps')
   apps.forEach((a, i) => {
@@ -234,23 +284,31 @@ export function validateConfig(raw: unknown): ValidationResult {
     color(a.color, `${p}.color`)
     if (a.icon !== undefined) str(a.icon, `${p}.icon`)
     const action = isObj(a.action) ? a.action : (err(`${p}.action`, 'missing'), {})
-    oneOf(action.type, `${p}.action.type`, ['launch', 'url', 'none'])
+    oneOf(action.type, `${p}.action.type`, ['launch', 'url', 'macro', 'none'])
     if (action.type === 'launch' || action.type === 'url') str(action.target, `${p}.action.target`)
+    if (action.type === 'macro') {
+      const steps = list(action.steps, `${p}.action.steps`)
+      if (steps.length === 0) err(`${p}.action.steps`, 'needs at least one step')
+      steps.forEach((st, j) => {
+        const sp = `${p}.action.steps[${j}]`
+        if (!isObj(st)) return err(sp, 'must be an object')
+        oneOf(st.type, `${sp}.type`, ['openApp', 'url', 'setSlider'])
+        if (st.type === 'openApp' && (typeof st.appId !== 'string' || !appIds.has(st.appId)))
+          err(`${sp}.appId`, `"${String(st.appId)}" is not the id of an app`)
+        if (st.type === 'openApp' && st.appId === a.id) err(`${sp}.appId`, 'a button cannot open itself')
+        if (st.type === 'url') str(st.target, `${sp}.target`)
+        if (st.type === 'setSlider') {
+          if (typeof st.sliderId !== 'string' || !sliderIds.has(st.sliderId))
+            err(`${sp}.sliderId`, `"${String(st.sliderId)}" is not the id of a slider`)
+          num(st.value, `${sp}.value`, 0, 100)
+        }
+      })
+    }
   })
 
   list(raw.favorites, 'favorites').forEach((id, i) => {
     if (typeof id !== 'string' || !appIds.has(id))
       err(`favorites[${i}]`, `"${String(id)}" is not the id of an app`)
-  })
-
-  const sliders = list(raw.sliders, 'sliders')
-  const sliderIds = uniqueIds(sliders, 'sliders')
-  sliders.forEach((s, i) => {
-    const p = `sliders[${i}]`
-    if (!isObj(s)) return err(p, 'must be an object')
-    oneOf(s.kind, `${p}.kind`, ['masterVolume', 'brightness', 'appVolume', 'device'])
-    str(s.label, `${p}.label`)
-    if (s.kind === 'appVolume' || s.kind === 'device') str(s.target, `${p}.target`)
   })
 
   const presets = list(raw.presets, 'presets')

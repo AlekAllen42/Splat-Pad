@@ -92,6 +92,14 @@ Each tile:
 Actions:
 - `{ "type": "launch", "target": "C:\\Path\\To\\Program.exe" }` opens a program
 - `{ "type": "url", "target": "https://example.com" }` opens a website
+- `{ "type": "macro", "steps": [...] }` a custom button that does several
+  things in order. Each step is one of:
+  - `{ "type": "openApp", "appId": "spotify" }`: do what that app tile does
+  - `{ "type": "url", "target": "https://example.com" }`: open a website
+  - `{ "type": "setSlider", "sliderId": "volume", "value": 40 }`: set a slider (0 to 100)
+
+  Removing an app or slider also removes the steps that used it; a custom
+  button left with no steps becomes `none`.
 - `{ "type": "none" }` does nothing (placeholder)
 
 The device itself never runs these. It reports which tile was tapped and

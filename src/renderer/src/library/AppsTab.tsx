@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import type { AppTile, Config } from '../../../shared/config'
+import { removeApp, type AppTile, type Config } from '../../../shared/config'
 import { readableOn } from '../device/Tile'
 import { ColorInput } from './controls'
-import { makeId, TILE_COLORS, type ConfigUpdate } from './helpers'
+import { describeAction, makeId, TILE_COLORS, type ConfigUpdate } from './helpers'
 
 function AppRow({
   app,
+  config,
   favorite,
   isFirst,
   isLast,
@@ -15,6 +16,7 @@ function AppRow({
   onRemove
 }: {
   app: AppTile
+  config: Config
   favorite: boolean
   isFirst: boolean
   isLast: boolean
@@ -23,7 +25,7 @@ function AppRow({
   onMove: (dir: -1 | 1) => void
   onRemove: () => void
 }): React.JSX.Element {
-  const target = app.action.type === 'none' ? 'Does nothing yet' : app.action.target
+  const target = describeAction(app.action, config)
   return (
     <li className="lib-app">
       <button
@@ -111,8 +113,8 @@ export default function AppsTab({ config, update }: { config: Config; update: Co
       return { ...c, apps }
     })
 
-  const removeApp = (id: string): void =>
-    update((c) => ({ ...c, apps: c.apps.filter((a) => a.id !== id), favorites: c.favorites.filter((f) => f !== id) }))
+  // Also removes it from favorites and custom buttons.
+  const removeAppById = (id: string): void => update((c) => removeApp(c, id))
 
   const toggleFavorite = (id: string): void =>
     update((c) => ({
@@ -170,13 +172,14 @@ export default function AppsTab({ config, update }: { config: Config; update: Co
           <AppRow
             key={app.id}
             app={app}
+            config={config}
             favorite={config.favorites.includes(app.id)}
             isFirst={i === 0}
             isLast={i === config.apps.length - 1}
             onChange={setApp}
             onToggleFavorite={() => toggleFavorite(app.id)}
             onMove={(dir) => moveApp(i, dir)}
-            onRemove={() => removeApp(app.id)}
+            onRemove={() => removeAppById(app.id)}
           />
         ))}
       </ul>

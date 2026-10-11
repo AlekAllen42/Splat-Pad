@@ -1,4 +1,4 @@
-import type { Config, Preset, Slider, SliderKind } from '../../../shared/config'
+import { removeSlider, type Config, type Preset, type Slider, type SliderKind } from '../../../shared/config'
 import { makeId, type ConfigUpdate } from './helpers'
 
 const KINDS: { value: SliderKind; label: string; needsTarget?: string }[] = [
@@ -18,17 +18,8 @@ export default function ControlsTab({ config, update }: { config: Config; update
       sliders: [...c.sliders, { id: makeId('volume', c.sliders.map((s) => s.id)), kind: 'masterVolume', label: 'Volume' }]
     }))
 
-  // Removing a slider also removes it from every preset.
-  const removeSlider = (id: string): void =>
-    update((c) => ({
-      ...c,
-      sliders: c.sliders.filter((s) => s.id !== id),
-      presets: c.presets.map((p) => {
-        const values = { ...p.values }
-        delete values[id]
-        return { ...p, values }
-      })
-    }))
+  // Also removes it from every preset and custom button.
+  const removeSliderById = (id: string): void => update((c) => removeSlider(c, id))
 
   const setPreset = (next: Preset): void =>
     update((c) => ({ ...c, presets: c.presets.map((p) => (p.id === next.id ? next : p)) }))
@@ -93,7 +84,7 @@ export default function ControlsTab({ config, update }: { config: Config; update
                 ) : (
                   <span />
                 )}
-                <button className="lib-icon-btn lib-remove" aria-label={`Remove ${s.label}`} onClick={() => removeSlider(s.id)}>
+                <button className="lib-icon-btn lib-remove" aria-label={`Remove ${s.label}`} onClick={() => removeSliderById(s.id)}>
                   ✕
                 </button>
               </li>

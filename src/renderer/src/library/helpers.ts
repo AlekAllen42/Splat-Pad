@@ -1,4 +1,36 @@
-import { GRID, SCREEN_HEIGHT, SCREEN_WIDTH, type Config, type Widget, type WidgetType } from '../../../shared/config'
+import {
+  GRID,
+  SCREEN_HEIGHT,
+  SCREEN_WIDTH,
+  type AppAction,
+  type Config,
+  type MacroStep,
+  type Widget,
+  type WidgetType
+} from '../../../shared/config'
+
+// Plain-language summary of what an app tile does, e.g. "Spotify → Volume 40%".
+export function describeStep(step: MacroStep, config: Config): string {
+  switch (step.type) {
+    case 'openApp':
+      return `Open ${config.apps.find((a) => a.id === step.appId)?.name ?? 'app'}`
+    case 'url':
+      return step.target.replace(/^https?:\/\/(www\.)?/i, '')
+    case 'setSlider':
+      return `${config.sliders.find((s) => s.id === step.sliderId)?.label ?? 'Slider'} ${step.value}%`
+  }
+}
+
+export function describeAction(action: AppAction, config: Config): string {
+  switch (action.type) {
+    case 'none':
+      return 'Does nothing yet'
+    case 'macro':
+      return action.steps.map((s) => describeStep(s, config)).join(' → ')
+    default:
+      return action.target
+  }
+}
 
 export type ConfigUpdate = (update: (c: Config) => Config) => void
 
