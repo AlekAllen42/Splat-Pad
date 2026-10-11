@@ -34,6 +34,10 @@ contextBridge.exposeInMainWorld('splatPad', {
   sendSavedConfig: (config: unknown) => ipcRenderer.send('device-saved-config', config),
   openPretendDevice: () => ipcRenderer.send('open-pretend-device'),
 
+  // Start with Windows (only in the installed app)
+  getAutostart: () => ipcRenderer.invoke('autostart-get'),
+  setAutostart: (on: boolean) => ipcRenderer.invoke('autostart-set', on),
+
   // Settings file
   loadConfig: () => ipcRenderer.invoke('config-load'),
   saveConfig: (config: unknown) => ipcRenderer.invoke('config-save', config),

@@ -43,6 +43,10 @@ interface Window {
     sendSavedConfig: (config: unknown) => void
     openPretendDevice: () => void
 
+    // Start with Windows; available is false while developing (npm run dev).
+    getAutostart: () => Promise<{ available: boolean; on: boolean }>
+    setAutostart: (on: boolean) => Promise<{ available: boolean; on: boolean }>
+
     // Settings file. loadConfig: config is null when nothing has been saved yet.
     loadConfig: () => Promise<{ config: import('../../shared/config').Config | null; warning?: string }>
     saveConfig: (config: unknown) => Promise<{ ok: true } | { ok: false; errors: string[] }>

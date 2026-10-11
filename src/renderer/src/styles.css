@@ -598,3 +598,12 @@ button {
     opacity: 0.3;
   }
 }
+
+.menu-item:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.menu-item:disabled:hover {
+  background: none;
+}

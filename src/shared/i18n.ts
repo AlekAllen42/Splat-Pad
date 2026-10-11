@@ -254,6 +254,14 @@ const en = {
   extras: 'Extras',
   openMessageOption: 'Show “Opening …” message when an app is tapped',
 
+  // ---------- tray and start with Windows ----------
+  trayOpen: 'Open Splat Pad',
+  trayQuit: 'Quit',
+  startAtLogin: 'Start with Windows',
+  startAtLoginDev: 'Start with Windows (works in the installed app)',
+  trayHintTitle: 'Splat Pad is still running',
+  trayHintBody: 'It keeps your Splat Pad working from the tray. Click the 42 icon to open it, or right-click it to quit.',
+
   // ---------- device connection ----------
   deviceConnected: (name: string) => `Connected · ${name}`,
   deviceConnecting: 'Connecting…',
@@ -532,6 +540,12 @@ const es: Strings = {
   extras: 'Extras',
   openMessageOption: 'Mostrar el mensaje “Abriendo …” al tocar una app',
 
+  trayOpen: 'Abrir Splat Pad',
+  trayQuit: 'Salir',
+  startAtLogin: 'Iniciar con Windows',
+  startAtLoginDev: 'Iniciar con Windows (funciona en la app instalada)',
+  trayHintTitle: 'Splat Pad sigue funcionando',
+  trayHintBody: 'Mantiene tu Splat Pad funcionando desde la bandeja. Haz clic en el icono 42 para abrirlo, o clic derecho para salir.',
   deviceConnected: (name) => `Conectado · ${name}`,
   deviceConnecting: 'Conectando…',
   deviceNotConnected: 'Sin conexión',
@@ -805,6 +819,12 @@ const fr: Strings = {
   extras: 'Extras',
   openMessageOption: 'Afficher le message « Ouverture de … » quand on appuie sur une app',
 
+  trayOpen: 'Ouvrir Splat Pad',
+  trayQuit: 'Quitter',
+  startAtLogin: 'Démarrer avec Windows',
+  startAtLoginDev: 'Démarrer avec Windows (fonctionne dans l’app installée)',
+  trayHintTitle: 'Splat Pad est toujours ouvert',
+  trayHintBody: 'Il fait fonctionner votre Splat Pad depuis la zone de notification. Cliquez sur l’icône 42 pour l’ouvrir, ou clic droit pour quitter.',
   deviceConnected: (name) => `Connecté · ${name}`,
   deviceConnecting: 'Connexion…',
   deviceNotConnected: 'Non connecté',

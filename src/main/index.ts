@@ -7,16 +7,39 @@ import { fetchSiteIcon } from './favicon'
 import { configPath, loadConfig, saveConfig } from './configStore'
 import { registerTestMode } from './testMode'
 import { registerLanguage, t } from './language'
-// the 42 Potential logo, shown in the taskbar and window corner
+// the 42 Potential logo, shown in the taskbar, window corner and tray
 import icon from '../../resources/icon.png?asset'
 import { registerDevice } from './device'
+import { HIDDEN_ARG, initAutostart, registerAutostart } from './autostart'
+import { createTray, refreshTrayMenu, showTrayHint, type TrayActions } from './tray'
+import { getPrefs, setPrefs } from './prefs'
+
+// The app keeps running in the tray so the Splat Pad keeps working:
+// closing the window hides it; "Quit" in the tray menu really exits.
 
 // Windows whose UI reported unsaved changes, and ones allowed to close anyway.
 const unsaved = new WeakSet<BrowserWindow>()
 const allowClose = new WeakSet<BrowserWindow>()
 let appWindow: BrowserWindow | null = null
+let quitting = false
 
-function createWindow(): void {
+function showWindow(): void {
+  if (!appWindow || appWindow.isDestroyed()) createWindow(true)
+  else {
+    if (appWindow.isMinimized()) appWindow.restore()
+    appWindow.show()
+    appWindow.focus()
+  }
+}
+
+function quitApp(): void {
+  quitting = true
+  app.quit()
+}
+
+const trayActions: TrayActions = { show: showWindow, quit: quitApp }
+
+function createWindow(visible: boolean): void {
   const win = new BrowserWindow({
     width: 1280,
     height: 800,
@@ -24,6 +47,7 @@ function createWindow(): void {
     minHeight: 680,
     title: 'Splat Pad',
     icon,
+    show: visible, // started at login: load hidden, so taps from the device still work
     backgroundColor: '#f6f3ec', // avoids a white flash before the UI loads
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -34,16 +58,27 @@ function createWindow(): void {
   })
 
   appWindow = win
-  // Closing the main window closes the pretend Splat Pad too, so the app quits.
+  // When the main window really closes (quitting), close the pretend Splat Pad too.
   win.on('closed', () => {
     appWindow = null
     for (const w of BrowserWindow.getAllWindows()) w.close()
   })
 
-  // Closing with unsaved changes asks first.
   win.on('close', (e) => {
+    // Not quitting: just hide in the tray (unsaved edits stay in the hidden window).
+    if (!quitting) {
+      e.preventDefault()
+      win.hide()
+      if (!getPrefs().trayHintShown) {
+        showTrayHint()
+        setPrefs({ trayHintShown: true })
+      }
+      return
+    }
+    // Quitting with unsaved changes: ask first.
     if (!unsaved.has(win) || allowClose.has(win)) return
     e.preventDefault()
+    win.show()
     const choice = dialog.showMessageBoxSync(win, {
       type: 'question',
       buttons: [t().save, t().dontSave, t().cancel],
@@ -57,7 +92,9 @@ function createWindow(): void {
       win.webContents.send('save-then-close') // the UI saves, then calls close-window
     } else if (choice === 1) {
       allowClose.add(win)
-      win.close()
+      app.quit()
+    } else {
+      quitting = false // Cancel: stay open
     }
   })
 
@@ -79,11 +116,13 @@ function registerConfigHandlers(): void {
     if (value === true) unsaved.add(win)
     else unsaved.delete(win)
   })
+  // After "Save" in the quit dialog: the UI saved, so finish quitting.
   ipcMain.on('close-window', (e) => {
     const win = BrowserWindow.fromWebContents(e.sender)
     if (!win) return
     allowClose.add(win)
-    win.close()
+    if (quitting) app.quit()
+    else win.close()
   })
   ipcMain.on('show-config-file', () => {
     const file = configPath()
@@ -92,27 +131,40 @@ function registerConfigHandlers(): void {
   })
 }
 
-app.whenReady().then(() => {
-  // Windows: our own taskbar identity, so the 42 Potential icon is used (not Electron's)
-  if (process.platform === 'win32') app.setAppUserModelId('com.42potential.splatpad')
-  registerPickers()
-  registerConfigHandlers()
-  registerLanguage()
-  registerTestMode()
-  registerDevice(() => appWindow, icon)
-  ipcMain.handle('find-starter-apps', (_e, ids: unknown) =>
-    findStarterApps(Array.isArray(ids) ? ids.filter((id): id is string => STARTER_IDS.includes(id)) : [])
-  )
-  ipcMain.handle('fetch-site-icon', (_e, url: unknown) => (typeof url === 'string' ? fetchSiteIcon(url) : null))
-  createWindow()
+// Only one copy runs; opening Splat Pad again just shows the existing window.
+if (!app.requestSingleInstanceLock()) {
+  app.quit()
+} else {
+  app.on('second-instance', showWindow)
 
-  // macOS: re-open a window when the dock icon is clicked.
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  app.whenReady().then(() => {
+    // Windows: our own taskbar identity, so the 42 Potential icon is used (not Electron's)
+    if (process.platform === 'win32') app.setAppUserModelId('com.42potential.splatpad')
+    registerPickers()
+    registerConfigHandlers()
+    registerLanguage(() => refreshTrayMenu(trayActions))
+    registerTestMode()
+    registerDevice(() => appWindow, icon)
+    registerAutostart(() => refreshTrayMenu(trayActions))
+    ipcMain.handle('find-starter-apps', (_e, ids: unknown) =>
+      findStarterApps(Array.isArray(ids) ? ids.filter((id): id is string => STARTER_IDS.includes(id)) : [])
+    )
+    ipcMain.handle('fetch-site-icon', (_e, url: unknown) => (typeof url === 'string' ? fetchSiteIcon(url) : null))
+
+    initAutostart()
+    createTray(icon, trayActions)
+    createWindow(!process.argv.includes(HIDDEN_ARG))
+
+    // macOS: re-open the window when the dock icon is clicked.
+    app.on('activate', showWindow)
   })
-})
 
-app.on('window-all-closed', () => {
-  // Phase 4 will keep the app running in the system tray instead.
-  if (process.platform !== 'darwin') app.quit()
-})
+  app.on('before-quit', () => {
+    quitting = true
+  })
+
+  // The tray keeps the app alive; it only exits through Quit.
+  app.on('window-all-closed', () => {
+    if (quitting) app.quit()
+  })
+}

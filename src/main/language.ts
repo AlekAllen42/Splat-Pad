@@ -8,8 +8,11 @@ let current: Language = 'en'
 
 export const t = (): Strings => stringsFor(current)
 
-export function registerLanguage(): void {
+export function registerLanguage(onChange: () => void): void {
   ipcMain.on('set-language', (_e, lang: unknown) => {
-    if (typeof lang === 'string' && (LANGUAGES as string[]).includes(lang)) current = lang as Language
+    if (typeof lang === 'string' && (LANGUAGES as string[]).includes(lang) && lang !== current) {
+      current = lang as Language
+      onChange()
+    }
   })
 }

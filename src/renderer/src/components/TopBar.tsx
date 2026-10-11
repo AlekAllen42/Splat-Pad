@@ -34,6 +34,12 @@ export default function TopBar({
   const themeLabel: Record<AppThemeMode, string> = { light: t.themeLight, dark: t.themeDark, system: t.themeSystem }
   const [open, setOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [autostart, setAutostart] = useState<{ available: boolean; on: boolean } | null>(null)
+
+  // read the start-with-Windows state whenever the menu opens
+  useEffect(() => {
+    if (menuOpen) void window.splatPad.getAutostart().then(setAutostart)
+  }, [menuOpen])
   const barRef = useRef<HTMLDivElement>(null)
   const closeTimer = useRef<number | undefined>(undefined)
 
@@ -119,6 +125,16 @@ export default function TopBar({
                   </button>
                 ))}
                 <div className="menu-sep" />
+                <button
+                  role="menuitemcheckbox"
+                  aria-checked={!!autostart?.on}
+                  className="menu-item"
+                  disabled={!autostart?.available}
+                  onClick={() => void window.splatPad.setAutostart(!autostart?.on).then(setAutostart)}
+                >
+                  <span className="menu-check">{autostart?.on ? '✓' : ''}</span>
+                  {autostart?.available === false ? t.startAtLoginDev : t.startAtLogin}
+                </button>
                 <button
                   role="menuitem"
                   className="menu-item"

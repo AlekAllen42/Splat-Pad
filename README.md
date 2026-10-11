@@ -18,6 +18,14 @@ Open it from the app with **☰ menu → Show settings file**. If the file is
 ever damaged, the app starts from the defaults and keeps the damaged copy
 next to it as `config.broken-<number>.json`.
 
+## Running in the background
+
+Closing the window keeps Splat Pad running in the tray (the 42 icon next to
+the clock), so the device keeps working. Click the icon to open the window;
+right-click it for **Start with Windows** and **Quit**. The installed app
+starts with Windows by default, hidden in the tray (`--hidden`); this is
+never registered while developing with `npm run dev`.
+
 ## Requirements
 
 - [Node.js](https://nodejs.org) 22.12 or newer (LTS recommended)
