@@ -1,5 +1,5 @@
 # Builds the Windows and Linux installers on GitHub's computers and publishes
-# them as a GitHub Release, which every installed Splat Pad checks for updates.
+# them as one GitHub Release, which every installed Splat Pad checks for updates.
 # Runs when a version tag is pushed (see docs/RELEASING.md):  git push --follow-tags
 name: Release
 
@@ -8,11 +8,20 @@ on:
     tags: ['v*']
 
 permissions:
-  contents: write # lets the build create the release and upload files
+  contents: write # lets the last step create the release and upload files
 
 jobs:
-  windows:
-    runs-on: windows-latest
+  # Each system builds its installer and hands the files to the release step.
+  # (electron-builder isn't left to publish: it can create the release twice.)
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            target: --win
+          - os: ubuntu-latest
+            target: --linux
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -22,23 +31,25 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run build
-      - run: npx electron-builder --win --publish always
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: npx electron-builder ${{ matrix.target }} --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.os }}
+          path: |
+            dist/*.exe
+            dist/*.blockmap
+            dist/*.AppImage
+            dist/latest*.yml
+          if-no-files-found: error
 
-  # Runs after Windows, so both add their files to the same release
-  # instead of racing to create it.
-  linux:
-    needs: windows
+  release:
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/download-artifact@v4
         with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npm run build
-      - run: npx electron-builder --linux --publish always
+          path: files
+          merge-multiple: true
+      - run: gh release create "$GITHUB_REF_NAME" files/* --repo "$GITHUB_REPOSITORY" --title "${GITHUB_REF_NAME#v}" --notes "Splat Pad ${GITHUB_REF_NAME#v}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
