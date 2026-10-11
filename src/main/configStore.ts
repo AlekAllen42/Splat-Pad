@@ -4,7 +4,7 @@ import { dirname, join } from 'path'
 import { validateConfig, type Config } from '../shared/config'
 
 // The settings file lives in the app's own data folder
-// (Windows: %APPDATA%\splat-pad\config.json).
+// (Windows: %APPDATA%\Splat Pad\config.json; the folder is named after productName).
 export const configPath = (): string => join(app.getPath('userData'), 'config.json')
 
 export interface LoadResult {

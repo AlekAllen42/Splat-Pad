@@ -11,8 +11,8 @@ device yet (Phase 2).
 
 Click **Save** (or press `Ctrl+S`). Settings are stored in one file:
 
-- Windows: `%APPDATA%splat-padconfig.json`
-- Linux: `~/.config/splat-pad/config.json`
+- Windows: `%APPDATA%\Splat Pad\config.json`
+- Linux: `~/.config/Splat Pad/config.json`
 
 Open it from the app with **☰ menu → Show settings file**. If the file is
 ever damaged, the app starts from the defaults and keeps the damaged copy
