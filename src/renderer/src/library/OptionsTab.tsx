@@ -25,7 +25,19 @@ export default function OptionsTab({ config, update }: { config: Config; update:
             onChange={(style) => update((c) => ({ ...c, tiles: { ...c.tiles, style } }))}
           />
         </Row>
-        <p className="lib-hint">Apps without an image show their first letter.</p>
+        <Row label="Tile boxes">
+          <Segmented
+            value={config.tiles.showBoxes ? 'show' : 'hide'}
+            options={[
+              { value: 'show', label: 'Show' },
+              { value: 'hide', label: 'Hide' }
+            ]}
+            onChange={(v) => update((c) => ({ ...c, tiles: { ...c.tiles, showBoxes: v === 'show' } }))}
+          />
+        </Row>
+        <p className="lib-hint">
+          Apps without an image show their first letter. With boxes hidden, you still tap the same square area.
+        </p>
       </section>
 
       <section className="lib-section">

@@ -1,7 +1,7 @@
 import { app } from 'electron'
 import { mkdir, readFile, rename, writeFile } from 'fs/promises'
 import { dirname, join } from 'path'
-import { validateConfig, type Config } from '../shared/config'
+import { upgradeConfig, validateConfig, type Config } from '../shared/config'
 
 // The settings file lives in the app's own data folder
 // (Windows: %APPDATA%\Splat Pad\config.json; the folder is named after productName).
@@ -23,7 +23,7 @@ export async function loadConfig(): Promise<LoadResult> {
 
   let problem: string
   try {
-    const result = validateConfig(JSON.parse(text))
+    const result = validateConfig(upgradeConfig(JSON.parse(text)))
     if (result.ok) return { config: result.config }
     problem = result.errors.slice(0, 3).join('; ')
   } catch {

@@ -66,10 +66,10 @@ export default function DeviceScreen({ config, testMode }: { config: Config; tes
         return <Clock settings={config.clock} w={wgt.w} h={wgt.h} />
       case 'carousel':
         return (
-          <Carousel apps={config.apps} tileStyle={config.tiles.style} settings={config.carousel} width={wgt.w} height={wgt.h} scale={scale} onTap={tapApp} />
+          <Carousel apps={config.apps} tileStyle={config.tiles.style} tileBoxes={config.tiles.showBoxes} settings={config.carousel} width={wgt.w} height={wgt.h} scale={scale} onTap={tapApp} />
         )
       case 'favorites':
-        return <Favorites apps={favoriteApps} tileStyle={config.tiles.style} w={wgt.w} h={wgt.h} pressedId={pressedId} onPress={tapApp} />
+        return <Favorites apps={favoriteApps} tileStyle={config.tiles.style} tileBoxes={config.tiles.showBoxes} w={wgt.w} h={wgt.h} pressedId={pressedId} onPress={tapApp} />
       case 'presets':
         return (
           <Presets

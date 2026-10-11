@@ -1,5 +1,5 @@
 import type { Config, Theme } from '../../../shared/config'
-import { ColorInput } from './controls'
+import { ColorInput, Toggle } from './controls'
 import type { ConfigUpdate } from './helpers'
 
 const THEMES: { name: string; theme: Theme }[] = [
@@ -12,16 +12,57 @@ const THEMES: { name: string; theme: Theme }[] = [
 ]
 
 const FIELDS: { key: keyof Theme; label: string; hint: string }[] = [
+  { key: 'accent', label: 'Accent', hint: 'Highlights, AM/PM, sliders button and slider fill' },
   { key: 'background', label: 'Background', hint: 'Behind everything' },
   { key: 'surface', label: 'Panels', hint: 'Buttons and slider tracks' },
-  { key: 'accent', label: 'Accent', hint: 'Highlights and slider fill' },
   { key: 'text', label: 'Text & outlines', hint: 'Words, borders and shadows' }
 ]
 
 const same = (a: Theme, b: Theme): boolean => FIELDS.every(({ key }) => a[key].toLowerCase() === b[key].toLowerCase())
 
+type ClockColorKey = 'timeColor' | 'dateColor' | 'ampmColor'
+
+// One clock color row: picker, name, and "Reset" back to the theme color.
+function ClockColorRow({
+  label,
+  hint,
+  value,
+  fallback,
+  onChange
+}: {
+  label: string
+  hint: string
+  value: string | undefined
+  fallback: string
+  onChange: (v: string | undefined) => void
+}): React.JSX.Element {
+  return (
+    <li className="lib-color-row">
+      <ColorInput label={label} value={value ?? fallback} onChange={onChange} />
+      <div>
+        <strong>{label}</strong>
+        <span>{value ? hint : `${hint} (using the theme)`}</span>
+      </div>
+      {value && (
+        <button className="btn btn-small" onClick={() => onChange(undefined)}>
+          Reset
+        </button>
+      )}
+    </li>
+  )
+}
+
 export default function ColorsTab({ config, update }: { config: Config; update: ConfigUpdate }): React.JSX.Element {
   const setTheme = (theme: Theme): void => update((c) => ({ ...c, theme }))
+  const { clock, theme } = config
+  const setClockColor = (key: ClockColorKey, value: string | undefined): void =>
+    update((c) => {
+      const next = { ...c.clock, [key]: value }
+      if (value === undefined) delete next[key] // missing = use the theme color
+      return { ...c, clock: next }
+    })
+  // "Separate" mode is on when a date or AM/PM color has been chosen.
+  const separate = clock.dateColor !== undefined || clock.ampmColor !== undefined
   return (
     <div className="lib-tab">
       <section className="lib-section">
@@ -57,6 +98,57 @@ export default function ColorsTab({ config, update }: { config: Config; update: 
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="lib-section">
+        <h3>Clock</h3>
+        <ul className="lib-list">
+          <ClockColorRow
+            label="Time"
+            hint="The big numbers"
+            value={clock.timeColor}
+            fallback={theme.text}
+            onChange={(v) => setClockColor('timeColor', v)}
+          />
+        </ul>
+        <Toggle
+          label="Separate date and AM/PM colors"
+          checked={separate}
+          onChange={(on) =>
+            update((c) => {
+              const next = { ...c.clock }
+              if (on) {
+                // start from what they look like now
+                next.dateColor = c.theme.text
+                next.ampmColor = c.theme.accent
+              } else {
+                delete next.dateColor
+                delete next.ampmColor
+              }
+              return { ...c, clock: next }
+            })
+          }
+        />
+        {separate ? (
+          <ul className="lib-list">
+            <ClockColorRow
+              label="Date"
+              hint="Day and date under the time"
+              value={clock.dateColor}
+              fallback={theme.text}
+              onChange={(v) => setClockColor('dateColor', v)}
+            />
+            <ClockColorRow
+              label="AM / PM"
+              hint="Shown with the 12-hour clock"
+              value={clock.ampmColor}
+              fallback={theme.accent}
+              onChange={(v) => setClockColor('ampmColor', v)}
+            />
+          </ul>
+        ) : (
+          <p className="lib-hint">The date uses the text color and AM/PM uses the accent color.</p>
+        )}
       </section>
     </div>
   )

@@ -12,20 +12,27 @@ interface Props {
   app: AppTile
   size: number
   style?: TileStyle
+  boxed?: boolean // false: no colored box, just the image/letter; the tap area stays the same square
   pressed?: boolean
 }
 
-// One app button, Stream Deck style: colored square with the app's image or
-// first letter, and (depending on the style) its name.
-export default function Tile({ app, size, style = 'imageName', pressed }: Props): React.JSX.Element {
-  const fg = readableOn(app.color)
+// One app button, Stream Deck style: the app's image or first letter, and
+// (depending on the style) its name, on a colored square unless boxes are off.
+export default function Tile({ app, size, style = 'imageName', boxed = true, pressed }: Props): React.JSX.Element {
   const useImage = style !== 'letterName' && !!app.icon
   const showName = !(useImage && style === 'image')
+  // Without a box the image can be bigger, since nothing surrounds it.
+  const imageScale = boxed ? (showName ? 0.5 : 0.66) : showName ? 0.62 : 0.86
 
   return (
     <div
-      className={`dev-tile ${pressed ? 'is-pressed' : ''} ${showName ? 'has-name' : ''}`}
-      style={{ width: size, height: size, background: app.color, color: fg }}
+      className={`dev-tile ${boxed ? '' : 'is-bare'} ${pressed ? 'is-pressed' : ''} ${showName ? 'has-name' : ''}`}
+      style={{
+        width: size,
+        height: size,
+        // boxless tiles sit on the screen background, so use the screen's text color
+        ...(boxed ? { background: app.color, color: readableOn(app.color) } : {})
+      }}
       title={app.name}
     >
       {useImage ? (
@@ -34,10 +41,10 @@ export default function Tile({ app, size, style = 'imageName', pressed }: Props)
           src={app.icon}
           alt=""
           draggable={false}
-          style={{ width: size * (showName ? 0.5 : 0.66), height: size * (showName ? 0.5 : 0.66) }}
+          style={{ width: size * imageScale, height: size * imageScale }}
         />
       ) : (
-        <span className="dev-tile-letter" style={{ fontSize: size * 0.38 }}>
+        <span className="dev-tile-letter" style={{ fontSize: size * (boxed ? 0.38 : 0.5) }}>
           {app.name.charAt(0).toUpperCase()}
         </span>
       )}

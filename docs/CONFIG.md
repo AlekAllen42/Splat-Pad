@@ -46,6 +46,9 @@ display's color depth once the firmware exists.
 | `format`      | `"12h"` or `"24h"`|
 | `showSeconds` | `true` / `false`  |
 | `showDate`    | `true` / `false`  |
+| `timeColor`   | Optional color for the time digits; default: theme `text` |
+| `dateColor`   | Optional color for the date; default: theme `text`, dimmed |
+| `ampmColor`   | Optional color for AM/PM; default: theme `accent` |
 
 ## carousel
 
@@ -64,6 +67,8 @@ find an app; it pauses while they scroll and resumes drifting afterwards.
 | Field   | Values                                                              | Default       |
 | ------- | ------------------------------------------------------------------- | ------------- |
 | `style` | `"imageName"` (image + name), `"image"` (image only), `"letterName"` (letter + name) | `"imageName"` |
+
+| `showBoxes` | `true` (colored box behind each app) or `false` (just the image or letter; the tap area stays the same square) | `true` |
 
 Apps without an `icon` always show their first letter and name.
 
@@ -132,6 +137,12 @@ TODO(hardware): icon image size and file format the device can display.
 | `id`     | Short unique name                                            |
 | `name`   | Label shown on the device                                    |
 | `values` | Slider id → position from 0 to 100, e.g. `{ "volume": 70 }`  |
+
+## Older files
+
+When a file saved by an older version of the app is loaded, settings added
+since then are filled in with their defaults (`upgradeConfig` in
+`src/shared/config.ts`), so saved settings keep working after updates.
 
 ## Example
 

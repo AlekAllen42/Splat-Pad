@@ -29,7 +29,7 @@ function CreationPreview({ creation, config }: { creation: Creation; config: Con
     case 'button':
       return (
         <div className="ai-preview">
-          <Tile app={{ ...creation.app, id: 'preview' }} size={64} style={config.tiles.style} />
+          <Tile app={{ ...creation.app, id: 'preview' }} size={64} style={config.tiles.style} boxed={config.tiles.showBoxes} />
           <div>
             <strong>{creation.app.name}</strong>
             <span>{describeAction(creation.app.action, config)}</span>

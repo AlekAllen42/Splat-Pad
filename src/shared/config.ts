@@ -17,6 +17,11 @@ export interface ClockSettings {
   format: '12h' | '24h'
   showSeconds: boolean
   showDate: boolean
+  // Optional colors; when missing the clock uses the theme:
+  // time -> theme text, date -> theme text (dimmed), AM/PM -> theme accent.
+  timeColor?: HexColor
+  dateColor?: HexColor
+  ampmColor?: HexColor
 }
 
 export interface CarouselSettings {
@@ -85,6 +90,7 @@ export type TileStyle = 'imageName' | 'image' | 'letterName'
 
 export interface TileSettings {
   style: TileStyle
+  showBoxes: boolean // false: just the image (or letter), same tap area, no colored box
 }
 
 export interface BehaviorSettings {
@@ -116,7 +122,7 @@ export const DEFAULT_CONFIG: Config = {
   },
   clock: { format: '12h', showSeconds: false, showDate: true },
   carousel: { columns: 2, speed: 18, direction: 'up', resumeDelayMs: 2000 },
-  tiles: { style: 'imageName' },
+  tiles: { style: 'imageName', showBoxes: true },
   behavior: { showOpenMessage: false },
   layout: [
     { id: 'carousel', type: 'carousel', x: 20, y: 20, w: 340, h: 440 },
@@ -144,6 +150,24 @@ export const DEFAULT_CONFIG: Config = {
     { id: 'gaming', name: 'Gaming', values: { volume: 70, brightness: 80, 'spotify-vol': 30 } },
     { id: 'night', name: 'Night', values: { volume: 35, brightness: 20, 'spotify-vol': 50 } }
   ]
+}
+
+// ---------------------------------------------------------------------------
+// Upgrading older files: settings added in later versions of the app get
+// their default values, so a file saved by an older version still loads.
+
+const SECTIONS = ['theme', 'clock', 'carousel', 'tiles', 'behavior'] as const
+
+export function upgradeConfig(raw: unknown): unknown {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return raw
+  const c = { ...(raw as Record<string, unknown>) }
+  for (const key of SECTIONS) {
+    const value = c[key]
+    if (value === undefined) c[key] = DEFAULT_CONFIG[key]
+    else if (typeof value === 'object' && value !== null && !Array.isArray(value))
+      c[key] = { ...DEFAULT_CONFIG[key], ...value }
+  }
+  return c
 }
 
 // ---------------------------------------------------------------------------
@@ -244,6 +268,8 @@ export function validateConfig(raw: unknown): ValidationResult {
   oneOf(clock.format, 'clock.format', ['12h', '24h'])
   bool(clock.showSeconds, 'clock.showSeconds')
   bool(clock.showDate, 'clock.showDate')
+  for (const key of ['timeColor', 'dateColor', 'ampmColor'] as const)
+    if (clock[key] !== undefined) color(clock[key], `clock.${key}`)
 
   const carousel = isObj(raw.carousel) ? raw.carousel : (err('carousel', 'missing'), {})
   num(carousel.columns, 'carousel.columns', 1, 4)
@@ -258,6 +284,7 @@ export function validateConfig(raw: unknown): ValidationResult {
 
   const tiles = isObj(raw.tiles) ? raw.tiles : (err('tiles', 'missing'), {})
   oneOf(tiles.style, 'tiles.style', ['imageName', 'image', 'letterName'])
+  bool(tiles.showBoxes, 'tiles.showBoxes')
 
   const layout = list(raw.layout, 'layout')
   uniqueIds(layout, 'layout')

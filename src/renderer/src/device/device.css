@@ -349,3 +349,23 @@
     transform: translate(-50%, 8px);
   }
 }
+
+/* Tiles with boxes turned off: just the image/letter on the screen
+   background. The element keeps its full square size, so the tap area
+   is the same as a boxed tile. */
+.dev-tile.is-bare {
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--d-text);
+}
+
+.dev-tile.is-bare.is-pressed {
+  transform: scale(0.92);
+  box-shadow: none;
+}
+
+.dev-tile.is-bare .dev-tile-icon {
+  /* a soft lift so images read as buttons without a box */
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25));
+}

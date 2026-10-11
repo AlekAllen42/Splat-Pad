@@ -29,12 +29,20 @@ export function Clock({ settings, w, h }: { settings: ClockSettings; w: number; 
 
   return (
     <div className="dev-clock">
-      <div className="dev-clock-time" style={{ fontSize: timeSize }}>
+      <div className="dev-clock-time" style={{ fontSize: timeSize, color: settings.timeColor }}>
         {time}
-        {ampm && <span className="dev-clock-ampm">{ampm}</span>}
+        {ampm && (
+          <span className="dev-clock-ampm" style={{ color: settings.ampmColor }}>
+            {ampm}
+          </span>
+        )}
       </div>
       {settings.showDate && (
-        <div className="dev-clock-date" style={{ fontSize: Math.max(14, timeSize * 0.24) }}>
+        <div
+          className="dev-clock-date"
+          // a chosen date color is used as-is; the default is the text color, dimmed
+          style={{ fontSize: Math.max(14, timeSize * 0.24), ...(settings.dateColor ? { color: settings.dateColor, opacity: 1 } : {}) }}
+        >
           {date}
         </div>
       )}
@@ -47,6 +55,7 @@ export function Clock({ settings, w, h }: { settings: ClockSettings; w: number; 
 export function Favorites({
   apps,
   tileStyle,
+  tileBoxes,
   w,
   h,
   pressedId,
@@ -54,6 +63,7 @@ export function Favorites({
 }: {
   apps: AppTile[]
   tileStyle: TileStyle
+  tileBoxes: boolean
   w: number
   h: number
   pressedId: string | null
@@ -67,7 +77,7 @@ export function Favorites({
       {apps.length === 0 && <span className="dev-empty">No favorites yet</span>}
       {apps.map((app) => (
         <button key={app.id} className="dev-plain" onClick={() => onPress(app)}>
-          <Tile app={app} size={size} style={tileStyle} pressed={pressedId === app.id} />
+          <Tile app={app} size={size} style={tileStyle} boxed={tileBoxes} pressed={pressedId === app.id} />
         </button>
       ))}
     </div>
