@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { removeApp, type AppTile, type Config } from '../../../shared/config'
 import { readableOn } from '../device/Tile'
 import { ColorInput } from './controls'
-import { describeAction, makeId, TILE_COLORS, type ConfigUpdate } from './helpers'
+import { attachSiteIcon, describeAction, makeId, TILE_COLORS, type ConfigUpdate } from './helpers'
+import StarterFinder from './StarterFinder'
 
 function AppRow({
   app,
@@ -101,6 +102,7 @@ export default function AppsTab({ config, update }: { config: Config; update: Co
     const name = webForm.name.trim() || url.replace(/^https?:\/\/(www\.)?/i, '').split('/')[0]
     addApp({ name, action: { type: 'url', target: url } })
     setWebForm(null)
+    void attachSiteIcon(update, url) // the tile shows its letter until the icon arrives
   }
 
   const setApp = (next: AppTile): void =>
@@ -164,6 +166,8 @@ export default function AppsTab({ config, update }: { config: Config; update: Co
           </button>
         </form>
       )}
+
+      <StarterFinder config={config} update={update} />
 
       <p className="lib-hint">Click an icon to choose your own image. ★ adds an app to the Favorites piece.</p>
 

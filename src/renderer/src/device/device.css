@@ -110,10 +110,14 @@
   line-height: 1;
 }
 
+/* leave room at the bottom for the name */
+.dev-tile.has-name {
+  padding-bottom: 14%;
+}
+
 .dev-tile-icon {
-  width: 55%;
-  height: 55%;
   object-fit: contain;
+  pointer-events: none;
 }
 
 .dev-tile-name {

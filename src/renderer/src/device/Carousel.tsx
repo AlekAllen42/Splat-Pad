@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import type { AppTile, CarouselSettings } from '../../../shared/config'
+import type { AppTile, CarouselSettings, TileStyle } from '../../../shared/config'
 import Tile from './Tile'
 
 interface Props {
   apps: AppTile[]
+  tileStyle: TileStyle
   settings: CarouselSettings
   width: number
   height: number
@@ -16,7 +17,7 @@ const TAP_SLOP = 6 // a press that moves less than this (screen px) counts as a 
 
 // App tiles in an endless loop that slowly drifts. Drag or use the mouse wheel
 // to scroll; drifting pauses and resumes after `resumeDelayMs`.
-export default function Carousel({ apps, settings, width, height, scale, onTap }: Props): React.JSX.Element {
+export default function Carousel({ apps, tileStyle, settings, width, height, scale, onTap }: Props): React.JSX.Element {
   const { columns, speed, direction, resumeDelayMs } = settings
   const tile = Math.max(20, Math.floor((width - GAP * (columns + 1)) / columns))
   const rows = Math.ceil(apps.length / columns)
@@ -118,7 +119,7 @@ export default function Carousel({ apps, settings, width, height, scale, onTap }
           >
             {apps.map((app) => (
               <div key={app.id} data-app-id={app.id}>
-                <Tile app={app} size={tile} pressed={pressedId === app.id} />
+                <Tile app={app} size={tile} style={tileStyle} pressed={pressedId === app.id} />
               </div>
             ))}
           </div>

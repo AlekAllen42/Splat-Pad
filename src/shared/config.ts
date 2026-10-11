@@ -80,6 +80,13 @@ export interface Widget {
   h: number
 }
 
+// How app tiles are drawn. Apps without an image always show their letter.
+export type TileStyle = 'imageName' | 'image' | 'letterName'
+
+export interface TileSettings {
+  style: TileStyle
+}
+
 export interface BehaviorSettings {
   showOpenMessage: boolean // brief "Opening Spotify" message when an app is tapped
 }
@@ -89,6 +96,7 @@ export interface Config {
   theme: Theme
   clock: ClockSettings
   carousel: CarouselSettings
+  tiles: TileSettings
   behavior: BehaviorSettings
   layout: Widget[] // where each piece sits on the screen
   apps: AppTile[]
@@ -108,6 +116,7 @@ export const DEFAULT_CONFIG: Config = {
   },
   clock: { format: '12h', showSeconds: false, showDate: true },
   carousel: { columns: 2, speed: 18, direction: 'up', resumeDelayMs: 2000 },
+  tiles: { style: 'imageName' },
   behavior: { showOpenMessage: false },
   layout: [
     { id: 'carousel', type: 'carousel', x: 20, y: 20, w: 340, h: 440 },
@@ -246,6 +255,9 @@ export function validateConfig(raw: unknown): ValidationResult {
 
   const behavior = isObj(raw.behavior) ? raw.behavior : (err('behavior', 'missing'), {})
   bool(behavior.showOpenMessage, 'behavior.showOpenMessage')
+
+  const tiles = isObj(raw.tiles) ? raw.tiles : (err('tiles', 'missing'), {})
+  oneOf(tiles.style, 'tiles.style', ['imageName', 'image', 'letterName'])
 
   const layout = list(raw.layout, 'layout')
   uniqueIds(layout, 'layout')

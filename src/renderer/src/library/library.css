@@ -563,3 +563,37 @@ input[type='checkbox'] {
   font-size: 0.8rem;
   color: var(--ink-dim);
 }
+
+/* ---------- Starter app finder ---------- */
+
+.lib-starter {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--accent-soft);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+}
+
+.lib-starter p {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.lib-starter-row label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.lib-starter-row img {
+  width: 20px;
+  height: 20px;
+}
+
+.lib-starter-row em {
+  color: var(--ink-dim);
+}

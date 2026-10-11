@@ -5,5 +5,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 contextBridge.exposeInMainWorld('splatPad', {
   platform: process.platform,
   pickProgram: () => ipcRenderer.invoke('pick-program'),
-  pickImage: () => ipcRenderer.invoke('pick-image')
+  pickImage: () => ipcRenderer.invoke('pick-image'),
+  findStarterApps: (ids: string[]) => ipcRenderer.invoke('find-starter-apps', ids),
+  fetchSiteIcon: (url: string) => ipcRenderer.invoke('fetch-site-icon', url)
 })

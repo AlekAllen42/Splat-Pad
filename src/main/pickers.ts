@@ -32,8 +32,11 @@ async function pickProgram(win: BrowserWindow): Promise<PickedProgram | null> {
         : [{ name: 'All files', extensions: ['*'] }]
   })
   if (result.canceled || result.filePaths.length === 0) return null
+  return describeProgram(result.filePaths[0])
+}
 
-  const picked = result.filePaths[0]
+// Name, launch path and icon for a program file or shortcut.
+export async function describeProgram(picked: string): Promise<PickedProgram> {
   let target = picked
   // A Windows shortcut (.lnk) points at the real program; use that for the icon.
   // Targets can contain variables like %windir%, which must be filled in first.

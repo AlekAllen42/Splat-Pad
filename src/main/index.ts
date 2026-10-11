@@ -1,6 +1,8 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { registerPickers } from './pickers'
+import { findStarterApps, STARTER_IDS } from './starterApps'
+import { fetchSiteIcon } from './favicon'
 
 function createWindow(): void {
   const win = new BrowserWindow({
@@ -29,6 +31,10 @@ function createWindow(): void {
 
 app.whenReady().then(() => {
   registerPickers()
+  ipcMain.handle('find-starter-apps', (_e, ids: unknown) =>
+    findStarterApps(Array.isArray(ids) ? ids.filter((id): id is string => STARTER_IDS.includes(id)) : [])
+  )
+  ipcMain.handle('fetch-site-icon', (_e, url: unknown) => (typeof url === 'string' ? fetchSiteIcon(url) : null))
   createWindow()
 
   // macOS: re-open a window when the dock icon is clicked.

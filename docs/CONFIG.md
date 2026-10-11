@@ -16,6 +16,7 @@ broken files with readable error messages).
 | `theme`     | Screen colors                                                 |
 | `clock`     | Clock display options                                         |
 | `carousel`  | How the moving app carousel behaves                           |
+| `tiles`     | How app tiles look (image, name, letter)                      |
 | `behavior`  | Optional extras, switched on from the Library                 |
 | `layout`    | Where each piece sits on the screen                           |
 | `apps`      | The app tiles in the carousel                                 |
@@ -58,6 +59,14 @@ find an app; it pauses while they scroll and resumes drifting afterwards.
 | `direction`     | `"up"` or `"down"`                                        |            |
 | `resumeDelayMs` | Wait after the user stops scrolling before drifting again | 0 to 60000 |
 
+## tiles
+
+| Field   | Values                                                              | Default       |
+| ------- | ------------------------------------------------------------------- | ------------- |
+| `style` | `"imageName"` (image + name), `"image"` (image only), `"letterName"` (letter + name) | `"imageName"` |
+
+Apps without an `icon` always show their first letter and name.
+
 ## behavior
 
 | Field             | Meaning                                                       | Default |
@@ -86,7 +95,7 @@ Each tile:
 | `id`     | Short unique name, e.g. `"spotify"`. Used by favorites.              |
 | `name`   | Label shown on the tile                                              |
 | `color`  | Tile background color                                               |
-| `icon`   | Optional image file, e.g. `"icons/spotify.png"`. Without one, the tile shows the first letter of the name. |
+| `icon`   | Optional image. Filled in automatically from the program (Add program, starter-app finder) or the website (Add website), or chosen by the user. Stored as a data URL for now. Without one, the tile shows the first letter of the name. |
 | `action` | What the PC does when the tile is tapped (see below)                 |
 
 Actions:

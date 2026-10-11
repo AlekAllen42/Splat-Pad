@@ -13,6 +13,22 @@ export default function OptionsTab({ config, update }: { config: Config; update:
   return (
     <div className="lib-tab">
       <section className="lib-section">
+        <h3>App tiles</h3>
+        <Row label="Show">
+          <Segmented
+            value={config.tiles.style}
+            options={[
+              { value: 'imageName', label: 'Image + name' },
+              { value: 'image', label: 'Image only' },
+              { value: 'letterName', label: 'Letter + name' }
+            ]}
+            onChange={(style) => update((c) => ({ ...c, tiles: { ...c.tiles, style } }))}
+          />
+        </Row>
+        <p className="lib-hint">Apps without an image show their first letter.</p>
+      </section>
+
+      <section className="lib-section">
         <h3>Clock</h3>
         <Row label="Format">
           <Segmented

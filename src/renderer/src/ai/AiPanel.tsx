@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Config } from '../../../shared/config'
 import Tile from '../device/Tile'
-import { describeAction, type ConfigUpdate } from '../library/helpers'
+import { attachSiteIcon, describeAction, type ConfigUpdate } from '../library/helpers'
 import { applyCreation, respond, type Creation, type Reply } from './mockAssistant'
 import { useReviewOutbox } from './reviewOutbox'
 import './ai.css'
@@ -29,7 +29,7 @@ function CreationPreview({ creation, config }: { creation: Creation; config: Con
     case 'button':
       return (
         <div className="ai-preview">
-          <Tile app={{ ...creation.app, id: 'preview' }} size={64} />
+          <Tile app={{ ...creation.app, id: 'preview' }} size={64} style={config.tiles.style} />
           <div>
             <strong>{creation.app.name}</strong>
             <span>{describeAction(creation.app.action, config)}</span>
@@ -195,7 +195,11 @@ export default function AiPanel({ config, update }: { config: Config; update: Co
               key={m.id}
               message={m}
               config={config}
-              onAdd={(creation) => update((c) => applyCreation(c, creation))}
+              onAdd={(creation) => {
+                update((c) => applyCreation(c, creation))
+                if (creation.kind === 'button' && creation.app.action.type === 'url')
+                  void attachSiteIcon(update, creation.app.action.target)
+              }}
               onSendForReview={() => addToOutbox({ request: m.request ?? '', creation: m.reply?.creation })}
             />
           )

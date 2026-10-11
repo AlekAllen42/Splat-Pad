@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { AppTile, ClockSettings, Preset, Slider } from '../../../shared/config'
+import type { AppTile, ClockSettings, Preset, Slider, TileStyle } from '../../../shared/config'
 import Tile from './Tile'
 
 // ---------- Clock ----------
@@ -46,12 +46,14 @@ export function Clock({ settings, w, h }: { settings: ClockSettings; w: number; 
 
 export function Favorites({
   apps,
+  tileStyle,
   w,
   h,
   pressedId,
   onPress
 }: {
   apps: AppTile[]
+  tileStyle: TileStyle
   w: number
   h: number
   pressedId: string | null
@@ -65,7 +67,7 @@ export function Favorites({
       {apps.length === 0 && <span className="dev-empty">No favorites yet</span>}
       {apps.map((app) => (
         <button key={app.id} className="dev-plain" onClick={() => onPress(app)}>
-          <Tile app={app} size={size} pressed={pressedId === app.id} />
+          <Tile app={app} size={size} style={tileStyle} pressed={pressedId === app.id} />
         </button>
       ))}
     </div>

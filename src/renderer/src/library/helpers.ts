@@ -82,3 +82,15 @@ export function placeWidget(
 
 // Tile colors handed out to newly added apps, in turn.
 export const TILE_COLORS = ['#e2562c', '#2f6b46', '#3b82f6', '#a9790a', '#7c3aed', '#0f766e', '#b3273f', '#374151']
+
+// Fetches a website's icon in the background and gives it to every website
+// tile for that address that doesn't have an icon yet.
+export async function attachSiteIcon(update: ConfigUpdate, url: string): Promise<boolean> {
+  const icon = await window.splatPad.fetchSiteIcon(url)
+  if (!icon) return false
+  update((c) => ({
+    ...c,
+    apps: c.apps.map((a) => (a.action.type === 'url' && a.action.target === url && !a.icon ? { ...a, icon } : a))
+  }))
+  return true
+}

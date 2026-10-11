@@ -40,10 +40,10 @@ export default function DeviceScreen({ config }: { config: Config }): React.JSX.
         return <Clock settings={config.clock} w={wgt.w} h={wgt.h} />
       case 'carousel':
         return (
-          <Carousel apps={config.apps} settings={config.carousel} width={wgt.w} height={wgt.h} scale={scale} onTap={tapApp} />
+          <Carousel apps={config.apps} tileStyle={config.tiles.style} settings={config.carousel} width={wgt.w} height={wgt.h} scale={scale} onTap={tapApp} />
         )
       case 'favorites':
-        return <Favorites apps={favoriteApps} w={wgt.w} h={wgt.h} pressedId={pressedId} onPress={tapApp} />
+        return <Favorites apps={favoriteApps} tileStyle={config.tiles.style} w={wgt.w} h={wgt.h} pressedId={pressedId} onPress={tapApp} />
       case 'presets':
         return (
           <Presets
