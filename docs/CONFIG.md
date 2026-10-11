@@ -16,6 +16,7 @@ broken files with readable error messages).
 | `theme`     | Screen colors                                                 |
 | `clock`     | Clock display options                                         |
 | `carousel`  | How the moving app carousel behaves                           |
+| `layout`    | Where each piece sits on the screen                           |
 | `apps`      | The app tiles in the carousel                                 |
 | `favorites` | App ids pinned to the favorites row                           |
 | `sliders`   | Sliders in the tap-to-reveal panel                            |
@@ -55,6 +56,19 @@ find an app; it pauses while they scroll and resumes drifting afterwards.
 | `speed`         | Drift speed in pixels per second; `0` = no drifting       | 0 to 200   |
 | `direction`     | `"up"` or `"down"`                                        |            |
 | `resumeDelayMs` | Wait after the user stops scrolling before drifting again | 0 to 60000 |
+
+## layout
+
+The screen is 800 × 480 pixels; `x` and `y` count from the top-left
+corner. Pieces snap to a 20-pixel grid in the layout editor and must be at
+least 40 pixels wide and tall. A piece may not stick out past the screen edge.
+
+| Field  | Meaning                                                              |
+| ------ | -------------------------------------------------------------------- |
+| `id`   | Short unique name                                                    |
+| `type` | `"clock"`, `"carousel"`, `"favorites"`, `"presets"`, or `"controls"` (the button that opens the sliders panel) |
+| `x`, `y` | Position of the top-left corner, in pixels                         |
+| `w`, `h` | Width and height, in pixels                                        |
 
 ## apps
 

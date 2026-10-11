@@ -1,9 +1,14 @@
+import { useState } from 'react'
 import TopBar from './components/TopBar'
 import Panel from './components/Panel'
+import DeviceScreen from './device/DeviceScreen'
 import { useAppTheme } from './appTheme'
+import { DEFAULT_CONFIG, type Config } from '../../shared/config'
 
 export default function App(): React.JSX.Element {
   const [themeMode, setThemeMode] = useAppTheme()
+  // The settings being edited. Later steps change these; Save writes them to disk.
+  const [config] = useState<Config>(DEFAULT_CONFIG)
 
   return (
     <div className="app">
@@ -11,7 +16,7 @@ export default function App(): React.JSX.Element {
 
       <main className="quadrants">
         <Panel title="Live screen" subtitle="What your Splat Pad shows right now">
-          <div className="placeholder">Device preview comes in step 2</div>
+          <DeviceScreen config={config} />
         </Panel>
         <Panel title="Layout" subtitle="Drag, resize and arrange pieces of the screen">
           <div className="placeholder">Layout editor comes in step 3</div>

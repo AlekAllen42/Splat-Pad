@@ -55,11 +55,30 @@ export interface Preset {
   values: Record<string, number> // slider id -> 0..100
 }
 
+// The device screen, in pixels. Layout positions use this coordinate space.
+export const SCREEN_WIDTH = 800
+export const SCREEN_HEIGHT = 480
+export const GRID = 20 // pieces snap to multiples of this
+export const MIN_WIDGET_SIZE = 40
+
+// The pieces that can be placed on the screen.
+export type WidgetType = 'clock' | 'carousel' | 'favorites' | 'presets' | 'controls'
+
+export interface Widget {
+  id: string
+  type: WidgetType
+  x: number // left edge, pixels from the left of the screen
+  y: number // top edge, pixels from the top of the screen
+  w: number
+  h: number
+}
+
 export interface Config {
   version: number
   theme: Theme
   clock: ClockSettings
   carousel: CarouselSettings
+  layout: Widget[] // where each piece sits on the screen
   apps: AppTile[]
   favorites: string[] // app ids, shown in the favorites row
   sliders: Slider[]
@@ -68,14 +87,22 @@ export interface Config {
 
 export const DEFAULT_CONFIG: Config = {
   version: CONFIG_VERSION,
+  // 42 Potential brand colors
   theme: {
-    background: '#0f1115',
-    surface: '#1c2029',
-    accent: '#4f8cff',
-    text: '#f2f3f5'
+    background: '#f6f3ec',
+    surface: '#efe8d9',
+    accent: '#e2562c',
+    text: '#1b1711'
   },
   clock: { format: '12h', showSeconds: false, showDate: true },
   carousel: { columns: 2, speed: 18, direction: 'up', resumeDelayMs: 2000 },
+  layout: [
+    { id: 'clock', type: 'clock', x: 20, y: 20, w: 400, h: 140 },
+    { id: 'favorites', type: 'favorites', x: 20, y: 180, w: 400, h: 140 },
+    { id: 'presets', type: 'presets', x: 20, y: 340, w: 300, h: 120 },
+    { id: 'controls', type: 'controls', x: 340, y: 340, w: 80, h: 120 },
+    { id: 'carousel', type: 'carousel', x: 440, y: 20, w: 340, h: 440 }
+  ],
   apps: [
     { id: 'browser', name: 'Browser', color: '#3b82f6', action: { type: 'none' } },
     { id: 'spotify', name: 'Spotify', color: '#1db954', action: { type: 'none' } },
@@ -172,6 +199,23 @@ export function validateConfig(raw: unknown): ValidationResult {
   num(carousel.speed, 'carousel.speed', 0, 200)
   oneOf(carousel.direction, 'carousel.direction', ['up', 'down'])
   num(carousel.resumeDelayMs, 'carousel.resumeDelayMs', 0, 60000)
+
+  const layout = list(raw.layout, 'layout')
+  uniqueIds(layout, 'layout')
+  layout.forEach((wgt, i) => {
+    const p = `layout[${i}]`
+    if (!isObj(wgt)) return err(p, 'must be an object')
+    oneOf(wgt.type, `${p}.type`, ['clock', 'carousel', 'favorites', 'presets', 'controls'])
+    num(wgt.x, `${p}.x`, 0, SCREEN_WIDTH - MIN_WIDGET_SIZE)
+    num(wgt.y, `${p}.y`, 0, SCREEN_HEIGHT - MIN_WIDGET_SIZE)
+    num(wgt.w, `${p}.w`, MIN_WIDGET_SIZE, SCREEN_WIDTH)
+    num(wgt.h, `${p}.h`, MIN_WIDGET_SIZE, SCREEN_HEIGHT)
+    const { x, y, w, h } = wgt
+    if (typeof x === 'number' && typeof w === 'number' && x + w > SCREEN_WIDTH)
+      err(p, `sticks out past the right edge of the screen (${SCREEN_WIDTH}px)`)
+    if (typeof y === 'number' && typeof h === 'number' && y + h > SCREEN_HEIGHT)
+      err(p, `sticks out past the bottom edge of the screen (${SCREEN_HEIGHT}px)`)
+  })
 
   const apps = list(raw.apps, 'apps')
   const appIds = uniqueIds(apps, 'apps')

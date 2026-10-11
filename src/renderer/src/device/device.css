@@ -1,0 +1,347 @@
+/* The device preview. Everything inside .dev-screen is drawn at the real
+   800x480 size, then the whole device is scaled to fit its panel.
+   Device colors come from the settings file via --d-* variables.
+   TODO(hardware): on-device fonts are chosen in the firmware (LVGL needs
+   fonts converted ahead of time); the preview uses the app's brand fonts. */
+
+.device-fit {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.device {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center;
+  background: #1b1711;
+  border-radius: 34px;
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.35);
+}
+
+.dev-screen {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--d-bg);
+  color: var(--d-text);
+  font-family: var(--font-body);
+  user-select: none;
+  -webkit-user-select: none;
+  --d-edge: color-mix(in srgb, var(--d-text) 85%, transparent);
+}
+
+.dev-widget {
+  position: absolute;
+}
+
+.dev-plain {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.dev-label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.dev-empty {
+  font-size: 14px;
+  opacity: 0.5;
+}
+
+.dev-btn {
+  font: inherit;
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--d-text);
+  background: var(--d-surface);
+  border: 2px solid var(--d-edge);
+  border-radius: 12px;
+  box-shadow: 3px 3px 0 var(--d-edge);
+  cursor: pointer;
+  transition:
+    transform 0.08s,
+    box-shadow 0.08s;
+}
+
+.dev-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--d-edge);
+}
+
+.dev-btn.is-active {
+  background: var(--d-accent);
+  color: #fff;
+}
+
+/* ---------- App tile ---------- */
+
+.dev-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--d-edge);
+  border-radius: 16px;
+  box-shadow: 3px 3px 0 var(--d-edge);
+  overflow: hidden;
+  transition:
+    transform 0.08s,
+    box-shadow 0.08s;
+}
+
+.dev-tile.is-pressed {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--d-edge);
+}
+
+.dev-tile-letter {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.dev-tile-icon {
+  width: 55%;
+  height: 55%;
+  object-fit: contain;
+}
+
+.dev-tile-name {
+  position: absolute;
+  bottom: 7%;
+  left: 6%;
+  right: 6%;
+  text-align: center;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Clock ---------- */
+
+.dev-clock {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.dev-clock-time {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.dev-clock-ampm {
+  font-size: 0.32em;
+  margin-left: 0.25em;
+  letter-spacing: 0.04em;
+  color: var(--d-accent);
+}
+
+.dev-clock-date {
+  margin-top: 0.4em;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+/* ---------- Favorites ---------- */
+
+.dev-favorites {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* ---------- Presets ---------- */
+
+.dev-presets {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dev-presets-list {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+  gap: 10px;
+  padding: 0 4px 4px 0; /* room for the flat shadow */
+}
+
+/* ---------- Sliders button ---------- */
+
+.dev-controls {
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  display: grid;
+  place-items: center;
+  background: var(--d-accent);
+  color: #fff;
+}
+
+/* ---------- Carousel ---------- */
+
+.dev-carousel {
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+  border-radius: 14px;
+  /* fade tiles in and out at the top and bottom edges */
+  mask-image: linear-gradient(transparent, #000 7%, #000 93%, transparent);
+}
+
+.dev-carousel:active {
+  cursor: grabbing;
+}
+
+.dev-carousel-track {
+  will-change: transform;
+}
+
+.dev-carousel-grid {
+  display: grid;
+  justify-content: center;
+}
+
+/* ---------- Slider panel (slides up when the sliders button is tapped) ---------- */
+
+.dev-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+
+.dev-scrim.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dev-slider-panel {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 0;
+  max-height: 78%;
+  overflow: auto;
+  padding: 18px 24px 24px;
+  background: var(--d-bg);
+  border: 2px solid var(--d-edge);
+  border-bottom: none;
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  transform: translateY(105%);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dev-slider-panel.is-open {
+  transform: translateY(0);
+}
+
+.dev-slider-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dev-close {
+  width: 44px;
+  height: 44px;
+  font-size: 18px;
+}
+
+.dev-slider {
+  display: grid;
+  grid-template-columns: 140px 1fr 60px;
+  align-items: center;
+  gap: 18px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.dev-slider-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dev-slider-value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+
+.dev-slider-track {
+  position: relative;
+  height: 22px;
+  border: 2px solid var(--d-edge);
+  border-radius: 999px;
+  background: var(--d-surface);
+  touch-action: none;
+  cursor: pointer;
+}
+
+.dev-slider-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--d-accent);
+  border-radius: 999px;
+}
+
+.dev-slider-knob {
+  position: absolute;
+  top: 50%;
+  width: 30px;
+  height: 30px;
+  transform: translate(-50%, -50%);
+  background: var(--d-bg);
+  border: 2px solid var(--d-edge);
+  border-radius: 50%;
+  box-shadow: 2px 2px 0 var(--d-edge);
+}
+
+/* ---------- "Open Spotify" message when a tile is tapped ---------- */
+
+.dev-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--d-bg);
+  background: var(--d-text);
+  border-radius: 999px;
+  pointer-events: none;
+  animation: dev-toast-in 0.2s ease-out;
+}
+
+@keyframes dev-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+}
