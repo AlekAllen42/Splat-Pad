@@ -1,0 +1,38 @@
+# Packaging settings for electron-builder (npm run dist:win / dist:linux).
+appId: com.42potential.splatpad # must match app.setAppUserModelId in src/main/index.ts
+productName: Splat Pad
+copyright: Copyright © 2026 42 Potential
+directories:
+  output: dist
+  buildResources: build
+files:
+  - out/**
+  - resources/**
+  - package.json
+# The tray/window icon is read from disk at runtime, so keep it outside the archive.
+asarUnpack:
+  - resources/**
+
+win:
+  icon: resources/icon.png
+  target:
+    - target: nsis
+      arch: x64
+  # Beta builds are unsigned. Signing settings go here once the certificate exists.
+
+nsis:
+  oneClick: true # double-click installs and opens, no questions
+  perMachine: false # current user only: no admin prompt
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: Splat Pad
+  runAfterFinish: true
+  deleteAppDataOnUninstall: false # keep the user's settings if they reinstall
+  artifactName: Splat-Pad-Setup-${version}.${ext}
+
+linux:
+  icon: resources/icon.png
+  category: Utility
+  target:
+    - AppImage
+  artifactName: Splat-Pad-${version}.${ext}
