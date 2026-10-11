@@ -146,8 +146,8 @@
 }
 
 .dev-clock-ampm {
-  font-size: 0.32em;
-  margin-left: 0.25em;
+  font-size: 0.26em;
+  margin-left: 0.15em;
   letter-spacing: 0.04em;
   color: var(--d-accent);
 }

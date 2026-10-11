@@ -24,8 +24,8 @@ export function Clock({ settings, w, h }: { settings: ClockSettings; w: number; 
   const date = now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })
 
   // Size the digits to fit the box: limited by both height and width.
-  const chars = time.length + (ampm ? 1.6 : 0)
-  const timeSize = Math.min(h * (settings.showDate ? 0.58 : 0.75), w / (chars * 0.62))
+  const chars = time.length + (ampm ? 1.2 : 0)
+  const timeSize = Math.min(h * (settings.showDate ? 0.6 : 0.8), w / (chars * 0.56))
 
   return (
     <div className="dev-clock">
@@ -34,7 +34,7 @@ export function Clock({ settings, w, h }: { settings: ClockSettings; w: number; 
         {ampm && <span className="dev-clock-ampm">{ampm}</span>}
       </div>
       {settings.showDate && (
-        <div className="dev-clock-date" style={{ fontSize: Math.max(12, timeSize * 0.22) }}>
+        <div className="dev-clock-date" style={{ fontSize: Math.max(14, timeSize * 0.24) }}>
           {date}
         </div>
       )}

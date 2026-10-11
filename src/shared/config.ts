@@ -97,11 +97,10 @@ export const DEFAULT_CONFIG: Config = {
   clock: { format: '12h', showSeconds: false, showDate: true },
   carousel: { columns: 2, speed: 18, direction: 'up', resumeDelayMs: 2000 },
   layout: [
-    { id: 'clock', type: 'clock', x: 20, y: 20, w: 400, h: 140 },
-    { id: 'favorites', type: 'favorites', x: 20, y: 180, w: 400, h: 140 },
-    { id: 'presets', type: 'presets', x: 20, y: 340, w: 300, h: 120 },
-    { id: 'controls', type: 'controls', x: 340, y: 340, w: 80, h: 120 },
-    { id: 'carousel', type: 'carousel', x: 440, y: 20, w: 340, h: 440 }
+    { id: 'carousel', type: 'carousel', x: 20, y: 20, w: 340, h: 440 },
+    { id: 'clock', type: 'clock', x: 400, y: 20, w: 380, h: 280 },
+    { id: 'presets', type: 'presets', x: 400, y: 320, w: 280, h: 140 },
+    { id: 'controls', type: 'controls', x: 700, y: 320, w: 80, h: 140 }
   ],
   apps: [
     { id: 'browser', name: 'Browser', color: '#3b82f6', action: { type: 'none' } },
