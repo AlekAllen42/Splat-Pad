@@ -2,13 +2,14 @@ import { useState } from 'react'
 import TopBar from './components/TopBar'
 import Panel from './components/Panel'
 import DeviceScreen from './device/DeviceScreen'
+import LayoutEditor from './editor/LayoutEditor'
 import { useAppTheme } from './appTheme'
 import { DEFAULT_CONFIG, type Config } from '../../shared/config'
 
 export default function App(): React.JSX.Element {
   const [themeMode, setThemeMode] = useAppTheme()
-  // The settings being edited. Later steps change these; Save writes them to disk.
-  const [config] = useState<Config>(DEFAULT_CONFIG)
+  // The settings being edited. Save (step 6) writes them to disk.
+  const [config, setConfig] = useState<Config>(DEFAULT_CONFIG)
 
   return (
     <div className="app">
@@ -19,7 +20,12 @@ export default function App(): React.JSX.Element {
           <DeviceScreen config={config} />
         </Panel>
         <Panel title="Layout" subtitle="Drag, resize and arrange pieces of the screen">
-          <div className="placeholder">Layout editor comes in step 3</div>
+          <LayoutEditor
+            layout={config.layout}
+            theme={config.theme}
+            onChange={(layout) => setConfig((c) => ({ ...c, layout }))}
+            onReset={() => setConfig((c) => ({ ...c, layout: DEFAULT_CONFIG.layout }))}
+          />
         </Panel>
         <Panel title="Create with AI" subtitle="Describe something new for your Splat Pad">
           <div className="placeholder">AI panel comes in step 5</div>

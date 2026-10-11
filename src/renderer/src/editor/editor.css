@@ -1,0 +1,157 @@
+/* Layout editor: the device screen drawn at its real 800x480 size, scaled to fit. */
+
+.layout-editor {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  outline: none;
+}
+
+.le-fit {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.le-screen {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center;
+  border: 4px solid var(--edge);
+  border-radius: 10px;
+  box-sizing: content-box;
+  /* faint grid lines every GRID pixels */
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--grid-line) 10%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--grid-line) 10%, transparent) 1px, transparent 1px);
+  background-size: var(--grid) var(--grid);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.le-box {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border: 3px dashed color-mix(in srgb, var(--accent) 70%, transparent);
+  border-radius: 12px;
+  color: var(--grid-line); /* device text color, readable on the device background */
+  cursor: move;
+  touch-action: none;
+}
+
+.le-box:hover {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.le-box.is-selected {
+  border-style: solid;
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+  z-index: 2;
+}
+
+.le-box.is-clash {
+  border-color: var(--danger, #b3273f);
+  background: color-mix(in srgb, #b3273f 22%, transparent);
+}
+
+.le-box-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  text-align: center;
+  padding: 0 8px;
+  pointer-events: none;
+}
+
+.le-box-size {
+  font-size: 16px;
+  opacity: 0.65;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+/* resize handles */
+.le-handle {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background: var(--surface);
+  border: 3px solid var(--accent);
+  border-radius: 6px;
+  touch-action: none;
+}
+
+.le-handle-n,
+.le-handle-s {
+  left: calc(50% - 11px);
+  cursor: ns-resize;
+}
+.le-handle-e,
+.le-handle-w {
+  top: calc(50% - 11px);
+  cursor: ew-resize;
+}
+.le-handle-n,
+.le-handle-ne,
+.le-handle-nw {
+  top: -13px;
+}
+.le-handle-s,
+.le-handle-se,
+.le-handle-sw {
+  bottom: -13px;
+}
+.le-handle-e,
+.le-handle-ne,
+.le-handle-se {
+  right: -13px;
+}
+.le-handle-w,
+.le-handle-nw,
+.le-handle-sw {
+  left: -13px;
+}
+.le-handle-ne,
+.le-handle-sw {
+  cursor: nesw-resize;
+}
+.le-handle-nw,
+.le-handle-se {
+  cursor: nwse-resize;
+}
+
+.le-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 36px;
+  font-size: 0.88rem;
+}
+
+.le-readout {
+  color: var(--ink-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.le-hint {
+  color: var(--ink-faint);
+}
+
+.le-reset {
+  margin-left: auto;
+}
+
+.btn-small {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.82rem;
+}

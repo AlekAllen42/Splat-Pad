@@ -2,30 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import { SCREEN_HEIGHT, SCREEN_WIDTH, type AppTile, type Config, type Widget } from '../../../shared/config'
 import Carousel from './Carousel'
 import { Clock, ControlsButton, Favorites, Presets, SliderPanel } from './widgets'
+import { useFitScale } from './useFitScale'
 import './device.css'
 
 const BEZEL = 22 // frame around the screen, in device pixels (preview only)
 
-// Shrinks the device to fit whatever space the panel gives it.
-function useFitScale(): [React.RefObject<HTMLDivElement | null>, number] {
-  const ref = useRef<HTMLDivElement>(null)
-  const [scale, setScale] = useState(0.5)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const observer = new ResizeObserver(([entry]) => {
-      const { width, height } = entry.contentRect
-      setScale(Math.min(width / (SCREEN_WIDTH + BEZEL * 2), height / (SCREEN_HEIGHT + BEZEL * 2)))
-    })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-  return [ref, scale]
-}
-
 // A working stand-in for the Splat Pad's 800x480 screen.
 export default function DeviceScreen({ config }: { config: Config }): React.JSX.Element {
-  const [fitRef, scale] = useFitScale()
+  const [fitRef, scale] = useFitScale(SCREEN_WIDTH + BEZEL * 2, SCREEN_HEIGHT + BEZEL * 2)
   const [panelOpen, setPanelOpen] = useState(false)
   const [sliderValues, setSliderValues] = useState<Record<string, number>>({})
   const [activePreset, setActivePreset] = useState<string | null>(null)
