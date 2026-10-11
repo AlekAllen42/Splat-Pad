@@ -13,6 +13,10 @@ contextBridge.exposeInMainWorld('splatPad', {
   testOpen: (kind: string, target: string) => ipcRenderer.invoke('test-open', kind, target),
   getVolume: () => ipcRenderer.invoke('test-get-volume'),
   setVolume: (value: number) => ipcRenderer.invoke('test-set-volume', value),
+  getBrightness: () => ipcRenderer.invoke('pc-get-brightness'),
+  setBrightness: (value: number) => ipcRenderer.invoke('pc-set-brightness', value),
+  getAppVolume: (name: string) => ipcRenderer.invoke('pc-get-app-volume', name),
+  setAppVolume: (name: string, value: number) => ipcRenderer.invoke('pc-set-app-volume', name, value),
 
   // Device connection (real or pretend Splat Pad)
   getDeviceStatus: () => ipcRenderer.invoke('device-get-status'),

@@ -4,7 +4,7 @@ import type { DeviceEvent } from '../../../shared/protocol'
 import Carousel from './Carousel'
 import { Clock, ControlsButton, Favorites, Presets, SliderPanel } from './widgets'
 import { useFitScale } from './useFitScale'
-import { runApp, runSlider } from './testRunner'
+import { readSlider, runApp, runSlider } from './testRunner'
 import { useT } from '../i18n'
 import './device.css'
 
@@ -73,14 +73,14 @@ export default function DeviceScreen({ config, testMode = false, onEvent }: Prop
     if (testMode && slider) void runSlider(slider, value, t).then((msg) => showToast(msg))
   }
 
-  // Entering test mode: start the volume sliders from the PC's real volume.
+  // Entering test mode: start the sliders from the PC's real levels.
   useEffect(() => {
     if (!testMode) return
-    void window.splatPad.getVolume().then((volume) => {
-      if (volume === null) return
-      const ids = config.sliders.filter((s) => s.kind === 'masterVolume').map((s) => s.id)
-      setSliderValues((vals) => ({ ...vals, ...Object.fromEntries(ids.map((id) => [id, volume])) }))
-    })
+    for (const s of config.sliders) {
+      void readSlider(s).then((level) => {
+        if (level !== null) setSliderValues((vals) => ({ ...vals, [s.id]: level }))
+      })
+    }
   }, [testMode]) // only when test mode is switched on, not on every settings change
 
   useEffect(() => () => window.clearTimeout(toastTimer.current), [])

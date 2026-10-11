@@ -28,6 +28,12 @@ interface Window {
     testOpen: (kind: "launch" | "url", target: string) => Promise<{ ok: boolean; error?: string }>
     getVolume: () => Promise<number | null>
     setVolume: (value: number) => Promise<boolean>
+    getBrightness: () => Promise<number | null>
+    // how many laptop screens / external monitors were set
+    setBrightness: (value: number) => Promise<{ laptop: number; external: number }>
+    getAppVolume: (name: string) => Promise<number | null>
+    // 'remembered' = the app isn't playing; applied when it starts
+    setAppVolume: (name: string, value: number) => Promise<'set' | 'remembered' | 'invalid'>
 
     // Device connection (real or pretend Splat Pad); the on* functions return an "unsubscribe".
     getDeviceStatus: () => Promise<import('../../shared/protocol').ConnectionStatus>
