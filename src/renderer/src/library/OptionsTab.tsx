@@ -1,4 +1,7 @@
-import type { Config } from '../../../shared/config'
+import type { Config, TileShape } from '../../../shared/config'
+
+const SHAPES: TileShape[] = ['square', 'circle', 'rectangle']
+const randomShape = (): TileShape => SHAPES[Math.floor(Math.random() * SHAPES.length)]
 import { Row, Segmented, Stepper, Toggle } from './controls'
 import type { ConfigUpdate } from './helpers'
 
@@ -34,10 +37,20 @@ export default function OptionsTab({ config, update }: { config: Config; update:
               { value: 'rectangle', label: 'Rectangle' },
               { value: 'mixed', label: 'Mixed' }
             ]}
-            onChange={(shape) => update((c) => ({ ...c, tiles: { ...c.tiles, shape } }))}
+            onChange={(shape) =>
+              update((c) => ({
+                ...c,
+                tiles: { ...c.tiles, shape },
+                // Mixed gives every app a random shape (again on each click); the
+                // user can then change any app's shape in the Apps tab.
+                apps: shape === 'mixed' ? c.apps.map((a) => ({ ...a, shape: randomShape() })) : c.apps
+              }))
+            }
           />
         </Row>
-        {config.tiles.shape === 'mixed' && <p className="lib-hint">Pick each app’s shape in the Apps tab.</p>}
+        {config.tiles.shape === 'mixed' && (
+          <p className="lib-hint">Shapes were picked at random. Click Mixed again to reshuffle, or set each app’s shape in the Apps tab.</p>
+        )}
         {config.tiles.shape === 'rectangle' && <p className="lib-hint">Rectangles are two columns wide.</p>}
         <Row label="Tile boxes">
           <Segmented
