@@ -1,0 +1,185 @@
+import { useState } from 'react'
+import type { AppTile, Config } from '../../../shared/config'
+import { readableOn } from '../device/Tile'
+import { ColorInput } from './controls'
+import { makeId, TILE_COLORS, type ConfigUpdate } from './helpers'
+
+function AppRow({
+  app,
+  favorite,
+  isFirst,
+  isLast,
+  onChange,
+  onToggleFavorite,
+  onMove,
+  onRemove
+}: {
+  app: AppTile
+  favorite: boolean
+  isFirst: boolean
+  isLast: boolean
+  onChange: (app: AppTile) => void
+  onToggleFavorite: () => void
+  onMove: (dir: -1 | 1) => void
+  onRemove: () => void
+}): React.JSX.Element {
+  const target = app.action.type === 'none' ? 'Does nothing yet' : app.action.target
+  return (
+    <li className="lib-app">
+      <button
+        className="lib-app-icon"
+        style={{ background: app.color, color: readableOn(app.color) }}
+        title="Change icon"
+        onClick={async () => {
+          const icon = await window.splatPad.pickImage()
+          if (icon) onChange({ ...app, icon })
+        }}
+      >
+        {app.icon ? <img src={app.icon} alt="" /> : app.name.charAt(0).toUpperCase()}
+      </button>
+      <div className="lib-app-main">
+        <input
+          className="lib-input lib-app-name"
+          value={app.name}
+          aria-label="App name"
+          onChange={(e) => onChange({ ...app, name: e.target.value })}
+        />
+        <span className="lib-app-target" title={target}>
+          {target}
+        </span>
+      </div>
+      <ColorInput label="Tile color" value={app.color} onChange={(color) => onChange({ ...app, color })} />
+      <button
+        className={`lib-icon-btn lib-star ${favorite ? 'is-on' : ''}`}
+        aria-label={favorite ? 'Remove from favorites' : 'Add to favorites'}
+        aria-pressed={favorite}
+        title="Favorite"
+        onClick={onToggleFavorite}
+      >
+        ★
+      </button>
+      <button className="lib-icon-btn" aria-label="Move up" disabled={isFirst} onClick={() => onMove(-1)}>
+        ↑
+      </button>
+      <button className="lib-icon-btn" aria-label="Move down" disabled={isLast} onClick={() => onMove(1)}>
+        ↓
+      </button>
+      <button className="lib-icon-btn lib-remove" aria-label={`Remove ${app.name}`} onClick={onRemove}>
+        ✕
+      </button>
+    </li>
+  )
+}
+
+export default function AppsTab({ config, update }: { config: Config; update: ConfigUpdate }): React.JSX.Element {
+  const [webForm, setWebForm] = useState<{ name: string; url: string } | null>(null)
+
+  const addApp = (fields: Omit<AppTile, 'id' | 'color'>): void =>
+    update((c) => ({
+      ...c,
+      apps: [
+        ...c.apps,
+        {
+          ...fields,
+          id: makeId(fields.name, c.apps.map((a) => a.id)),
+          color: TILE_COLORS[c.apps.length % TILE_COLORS.length]
+        }
+      ]
+    }))
+
+  const addProgram = async (): Promise<void> => {
+    const picked = await window.splatPad.pickProgram()
+    if (picked) addApp({ name: picked.name, icon: picked.icon, action: { type: 'launch', target: picked.path } })
+  }
+
+  const addWebsite = (): void => {
+    if (!webForm) return
+    let url = webForm.url.trim()
+    if (!/^https?:\/\//i.test(url)) url = `https://${url}`
+    const name = webForm.name.trim() || url.replace(/^https?:\/\/(www\.)?/i, '').split('/')[0]
+    addApp({ name, action: { type: 'url', target: url } })
+    setWebForm(null)
+  }
+
+  const setApp = (next: AppTile): void =>
+    update((c) => ({ ...c, apps: c.apps.map((a) => (a.id === next.id ? next : a)) }))
+
+  const moveApp = (index: number, dir: -1 | 1): void =>
+    update((c) => {
+      const apps = [...c.apps]
+      ;[apps[index], apps[index + dir]] = [apps[index + dir], apps[index]]
+      return { ...c, apps }
+    })
+
+  const removeApp = (id: string): void =>
+    update((c) => ({ ...c, apps: c.apps.filter((a) => a.id !== id), favorites: c.favorites.filter((f) => f !== id) }))
+
+  const toggleFavorite = (id: string): void =>
+    update((c) => ({
+      ...c,
+      favorites: c.favorites.includes(id) ? c.favorites.filter((f) => f !== id) : [...c.favorites, id]
+    }))
+
+  return (
+    <div className="lib-tab">
+      <div className="lib-actions">
+        <button className="btn btn-small btn-primary" onClick={addProgram}>
+          + Add program
+        </button>
+        <button className="btn btn-small" onClick={() => setWebForm({ name: '', url: '' })}>
+          + Add website
+        </button>
+        <span className="lib-count">{config.apps.length} apps</span>
+      </div>
+
+      {webForm && (
+        <form
+          className="lib-inline-form"
+          onSubmit={(e) => {
+            e.preventDefault()
+            addWebsite()
+          }}
+        >
+          <input
+            className="lib-input"
+            placeholder="Name (optional)"
+            value={webForm.name}
+            onChange={(e) => setWebForm({ ...webForm, name: e.target.value })}
+          />
+          <input
+            className="lib-input"
+            placeholder="example.com"
+            required
+            autoFocus
+            value={webForm.url}
+            onChange={(e) => setWebForm({ ...webForm, url: e.target.value })}
+          />
+          <button className="btn btn-small btn-primary" type="submit">
+            Add
+          </button>
+          <button className="btn btn-small" type="button" onClick={() => setWebForm(null)}>
+            Cancel
+          </button>
+        </form>
+      )}
+
+      <p className="lib-hint">Click an icon to choose your own image. ★ adds an app to the Favorites piece.</p>
+
+      <ul className="lib-list">
+        {config.apps.map((app, i) => (
+          <AppRow
+            key={app.id}
+            app={app}
+            favorite={config.favorites.includes(app.id)}
+            isFirst={i === 0}
+            isLast={i === config.apps.length - 1}
+            onChange={setApp}
+            onToggleFavorite={() => toggleFavorite(app.id)}
+            onMove={(dir) => moveApp(i, dir)}
+            onRemove={() => removeApp(app.id)}
+          />
+        ))}
+      </ul>
+    </div>
+  )
+}

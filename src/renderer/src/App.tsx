@@ -3,6 +3,7 @@ import TopBar from './components/TopBar'
 import Panel from './components/Panel'
 import DeviceScreen from './device/DeviceScreen'
 import LayoutEditor from './editor/LayoutEditor'
+import Library from './library/Library'
 import { useAppTheme } from './appTheme'
 import { DEFAULT_CONFIG, type Config } from '../../shared/config'
 
@@ -30,8 +31,8 @@ export default function App(): React.JSX.Element {
         <Panel title="Create with AI" subtitle="Describe something new for your Splat Pad">
           <div className="placeholder">AI panel comes in step 5</div>
         </Panel>
-        <Panel title="Library" subtitle="Apps, widgets, presets and colors">
-          <div className="placeholder">Library comes in step 4</div>
+        <Panel title="Library" subtitle="Apps, pieces, controls, colors and options">
+          <Library config={config} update={setConfig} />
         </Panel>
       </main>
     </div>

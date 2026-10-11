@@ -1,5 +1,6 @@
 import { app, BrowserWindow } from 'electron'
 import { join } from 'path'
+import { registerPickers } from './pickers'
 
 function createWindow(): void {
   const win = new BrowserWindow({
@@ -27,6 +28,7 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
+  registerPickers()
   createWindow()
 
   // macOS: re-open a window when the dock icon is clicked.
