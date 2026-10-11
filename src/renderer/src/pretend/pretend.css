@@ -1,0 +1,31 @@
+/* The pretend Splat Pad window: a dark desk-like backdrop with the device. */
+
+.pretend {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #2a2520;
+  color: #f1eadf;
+}
+
+.pretend-note {
+  margin: 0;
+  padding: 8px 16px;
+  font-size: 0.78rem;
+  color: #cfc6b8;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.pretend-screen {
+  flex: 1;
+  min-height: 0;
+  padding: 16px;
+}
+
+.pretend-waiting {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 1.1rem;
+  color: #a39b8c;
+}

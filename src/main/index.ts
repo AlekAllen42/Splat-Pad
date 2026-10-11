@@ -9,10 +9,12 @@ import { registerTestMode } from './testMode'
 import { registerLanguage, t } from './language'
 // the 42 Potential logo, shown in the taskbar and window corner
 import icon from '../../resources/icon.png?asset'
+import { registerDevice } from './device'
 
 // Windows whose UI reported unsaved changes, and ones allowed to close anyway.
 const unsaved = new WeakSet<BrowserWindow>()
 const allowClose = new WeakSet<BrowserWindow>()
+let appWindow: BrowserWindow | null = null
 
 function createWindow(): void {
   const win = new BrowserWindow({
@@ -29,6 +31,13 @@ function createWindow(): void {
       contextIsolation: true,
       nodeIntegration: false
     }
+  })
+
+  appWindow = win
+  // Closing the main window closes the pretend Splat Pad too, so the app quits.
+  win.on('closed', () => {
+    appWindow = null
+    for (const w of BrowserWindow.getAllWindows()) w.close()
   })
 
   // Closing with unsaved changes asks first.
@@ -90,6 +99,7 @@ app.whenReady().then(() => {
   registerConfigHandlers()
   registerLanguage()
   registerTestMode()
+  registerDevice(() => appWindow, icon)
   ipcMain.handle('find-starter-apps', (_e, ids: unknown) =>
     findStarterApps(Array.isArray(ids) ? ids.filter((id): id is string => STARTER_IDS.includes(id)) : [])
   )

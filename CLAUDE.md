@@ -43,6 +43,10 @@ Window layout:
 - Center: orange star in a circle cut from the four panels' inner corners;
   spins on hover, click toggles Test mode (taps in the live screen really
   open apps/websites and set master volume on this PC; glows while on).
+- Live screen title: device connection light. Menu > "Open pretend Splat
+  Pad" opens a second window running a TypeScript stand-in for the firmware
+  (src/renderer/src/pretend/firmware.ts) over the real protocol; the C++
+  firmware must behave the same way.
 - Bottom right: library, add apps (with icons from the PC), clock,
   sliders, presets, device background/theme colors, quantities, and
   optional extras (e.g. "Opening <app>" message on tap, off by default).

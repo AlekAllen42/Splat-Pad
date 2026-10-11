@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import ConnectionLight, { useConnectionStatus } from './components/ConnectionLight'
+import { runApp, runSlider } from './device/testRunner'
 import TopBar from './components/TopBar'
 import CenterStar from './components/CenterStar'
 import Panel from './components/Panel'
@@ -18,6 +20,39 @@ export default function App(): React.JSX.Element {
   const settings = useSettings()
   const { config, update } = settings
   const [testMode, setTestMode] = useState(false) // not saved; always starts off
+  const connection = useConnectionStatus()
+
+  // Taps and slider moves on the Splat Pad run on this PC (same code as test mode).
+  const configRef = useRef(config)
+  configRef.current = config
+  const showNotice = settings.showNotice
+  useEffect(
+    () =>
+      window.splatPad.onDeviceEvent((event) => {
+        const c = configRef.current
+        const t = stringsFor(c.language)
+        const report = (messages: string[]): void => {
+          if (messages.length) showNotice({ kind: 'info', text: messages.join(' · ') })
+        }
+        if (event.type === 'tap') {
+          const target = c.apps.find((a) => a.id === event.appId)
+          if (target) void runApp(target, c, t).then(report)
+        } else if (event.type === 'slider') {
+          const slider = c.sliders.find((s) => s.id === event.sliderId)
+          if (slider) void runSlider(slider, event.value, t).then((m) => report([m]))
+        } else {
+          const preset = c.presets.find((p) => p.id === event.presetId)
+          if (!preset) return
+          void Promise.all(
+            Object.entries(preset.values).map(([id, value]) => {
+              const slider = c.sliders.find((s) => s.id === id)
+              return slider ? runSlider(slider, value, t) : Promise.resolve('')
+            })
+          ).then((m) => report(m.filter(Boolean)))
+        }
+      }),
+    [showNotice]
+  )
 
   const t = stringsFor(config.language)
 
@@ -40,6 +75,7 @@ export default function App(): React.JSX.Element {
         <Panel
           className="panel-tl"
           title={t.liveScreen}
+          status={<ConnectionLight status={connection} />}
           subtitle={testMode ? t.liveScreenTestSub : t.liveScreenSub}
         >
           <DeviceScreen config={config} testMode={testMode} />

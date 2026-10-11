@@ -554,3 +554,47 @@ button {
 .panel-tr { grid-area: 1 / 2; }
 .panel-bl { grid-area: 2 / 1; }
 .panel-br { grid-area: 2 / 2; }
+
+/* ---------- Device connection light (Live screen title) ---------- */
+
+.panel-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.conn-light {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-dim);
+  background: var(--raised);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.conn-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ink-faint);
+}
+
+.conn-connected .conn-dot {
+  background: #2f9e5b;
+  box-shadow: 0 0 0 3px rgba(47, 158, 91, 0.2);
+}
+
+.conn-connecting .conn-dot {
+  background: #e2a12c;
+  animation: conn-blink 1s ease-in-out infinite;
+}
+
+@keyframes conn-blink {
+  50% {
+    opacity: 0.3;
+  }
+}

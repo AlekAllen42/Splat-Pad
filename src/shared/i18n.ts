@@ -249,6 +249,16 @@ const en = {
   extras: 'Extras',
   openMessageOption: 'Show “Opening …” message when an app is tapped',
 
+  // ---------- device connection ----------
+  deviceConnected: (name: string) => `Connected · ${name}`,
+  deviceConnecting: 'Connecting…',
+  deviceNotConnected: 'Not connected',
+  deviceDetails: (model: string, firmware: string) => `Model ${model} · firmware ${firmware}`,
+  pretendName: 'Pretend Splat Pad',
+  openPretend: 'Open pretend Splat Pad',
+  waitingForComputer: 'Waiting for the computer…',
+  pretendNote: 'Pretend device for testing: it talks to the app exactly like the real Splat Pad will. Taps here really run on this PC.',
+
   // ---------- AI panel ----------
   aiDemo: 'Demo mode: answers are pretend until AI is connected through 42potential.com.',
   aiIntro: 'Describe something you want your Splat Pad to do. Try:',
@@ -512,6 +522,15 @@ const es: Strings = {
   extras: 'Extras',
   openMessageOption: 'Mostrar el mensaje “Abriendo …” al tocar una app',
 
+  deviceConnected: (name) => `Conectado · ${name}`,
+  deviceConnecting: 'Conectando…',
+  deviceNotConnected: 'Sin conexión',
+  deviceDetails: (model, firmware) => `Modelo ${model} · firmware ${firmware}`,
+  pretendName: 'Splat Pad de prueba',
+  openPretend: 'Abrir Splat Pad de prueba',
+  waitingForComputer: 'Esperando a la computadora…',
+  pretendNote: 'Dispositivo de prueba: se comunica con la app igual que lo hará el Splat Pad real. Los toques aquí se ejecutan de verdad en esta PC.',
+
   aiDemo: 'Modo demo: las respuestas son simuladas hasta conectar la IA a través de 42potential.com.',
   aiIntro: 'Describe algo que quieras que haga tu Splat Pad. Prueba:',
   aiExamples: [
@@ -770,6 +789,15 @@ const fr: Strings = {
   resumeAfterLabel: 'Reprendre le défilement après',
   extras: 'Extras',
   openMessageOption: 'Afficher le message « Ouverture de … » quand on appuie sur une app',
+
+  deviceConnected: (name) => `Connecté · ${name}`,
+  deviceConnecting: 'Connexion…',
+  deviceNotConnected: 'Non connecté',
+  deviceDetails: (model, firmware) => `Modèle ${model} · firmware ${firmware}`,
+  pretendName: 'Splat Pad de test',
+  openPretend: 'Ouvrir le Splat Pad de test',
+  waitingForComputer: 'En attente de l’ordinateur…',
+  pretendNote: 'Appareil de test : il communique avec l’app exactement comme le fera le vrai Splat Pad. Les appuis ici s’exécutent vraiment sur ce PC.',
 
   aiDemo: 'Mode démo : les réponses sont simulées jusqu’à ce que l’IA soit connectée via 42potential.com.',
   aiIntro: 'Décrivez ce que vous voulez que votre Splat Pad fasse. Essayez :',

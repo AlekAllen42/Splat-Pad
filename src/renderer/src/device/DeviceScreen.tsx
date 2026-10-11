@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { SCREEN_HEIGHT, SCREEN_WIDTH, type AppTile, type Config, type Widget } from '../../../shared/config'
+import type { DeviceEvent } from '../../../shared/protocol'
 import Carousel from './Carousel'
 import { Clock, ControlsButton, Favorites, Presets, SliderPanel } from './widgets'
 import { useFitScale } from './useFitScale'
@@ -8,10 +9,19 @@ import { useT } from '../i18n'
 import './device.css'
 
 const BEZEL = 22 // frame around the screen, in device pixels (preview only)
+const SLIDER_EVENT_MS = 100 // report slider drags at most ~10 times a second (docs/PROTOCOL.md)
+
+interface Props {
+  config: Config
+  // testMode: taps really open apps/websites and change the volume on this PC.
+  testMode?: boolean
+  // onEvent: act like the device and report taps/slider moves instead of
+  // running them here (used by the pretend Splat Pad).
+  onEvent?: (event: DeviceEvent) => void
+}
 
 // A working stand-in for the Splat Pad's 800x480 screen.
-// testMode: taps really open apps/websites and change the volume on this PC.
-export default function DeviceScreen({ config, testMode }: { config: Config; testMode: boolean }): React.JSX.Element {
+export default function DeviceScreen({ config, testMode = false, onEvent }: Props): React.JSX.Element {
   const t = useT()
   const [fitRef, scale] = useFitScale(SCREEN_WIDTH + BEZEL * 2, SCREEN_HEIGHT + BEZEL * 2)
   const [panelOpen, setPanelOpen] = useState(false)
@@ -20,6 +30,7 @@ export default function DeviceScreen({ config, testMode }: { config: Config; tes
   const [pressedId, setPressedId] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const toastTimer = useRef<number | undefined>(undefined)
+  const sliderSent = useRef<Record<string, { at: number; timer?: number }>>({})
 
   const showToast = (text: string, ms = 1400): void => {
     window.clearTimeout(toastTimer.current)
@@ -32,15 +43,32 @@ export default function DeviceScreen({ config, testMode }: { config: Config; tes
   const tapApp = (app: AppTile): void => {
     setPressedId(app.id)
     window.setTimeout(() => setPressedId(null), 160)
-    if (testMode) {
+    if (onEvent) {
+      onEvent({ type: 'tap', appId: app.id })
+      if (config.behavior.showOpenMessage) showToast(t.opening(app.name))
+    } else if (testMode) {
       void runApp(app, config, t).then((messages) => showToast(messages.join(' · '), 2600))
     } else if (config.behavior.showOpenMessage) {
       showToast(t.opening(app.name))
     }
   }
 
+  // Device mode: send slider moves, at most every 100 ms plus the final value.
+  const reportSlider = (id: string, value: number): void => {
+    const sent = (sliderSent.current[id] ??= { at: 0 })
+    window.clearTimeout(sent.timer)
+    const wait = SLIDER_EVENT_MS - (Date.now() - sent.at)
+    const fire = (): void => {
+      sent.at = Date.now()
+      onEvent?.({ type: 'slider', sliderId: id, value })
+    }
+    if (wait <= 0) fire()
+    else sent.timer = window.setTimeout(fire, wait)
+  }
+
   const setSlider = (id: string, value: number): void => {
     setSliderValues((vals) => ({ ...vals, [id]: value }))
+    if (onEvent) return reportSlider(id, value)
     const slider = config.sliders.find((s) => s.id === id)
     if (testMode && slider) void runSlider(slider, value, t).then((msg) => showToast(msg))
   }
@@ -79,7 +107,13 @@ export default function DeviceScreen({ config, testMode }: { config: Config; tes
             activeId={activePreset}
             onApply={(p) => {
               setActivePreset(p.id)
-              for (const [id, value] of Object.entries(p.values)) setSlider(id, value)
+              if (onEvent) {
+                // the device reports the preset; the app applies its values
+                setSliderValues((v) => ({ ...v, ...p.values }))
+                onEvent({ type: 'preset', presetId: p.id })
+              } else {
+                for (const [id, value] of Object.entries(p.values)) setSlider(id, value)
+              }
             }}
           />
         )

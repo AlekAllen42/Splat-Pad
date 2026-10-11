@@ -14,6 +14,22 @@ contextBridge.exposeInMainWorld('splatPad', {
   getVolume: () => ipcRenderer.invoke('test-get-volume'),
   setVolume: (value: number) => ipcRenderer.invoke('test-set-volume', value),
 
+  // Device connection (real or pretend Splat Pad)
+  getDeviceStatus: () => ipcRenderer.invoke('device-get-status'),
+  onDeviceStatus: (callback: (status: unknown) => void) => {
+    const listener = (_e: Electron.IpcRendererEvent, status: unknown): void => callback(status)
+    ipcRenderer.on('device-status', listener)
+    return () => ipcRenderer.removeListener('device-status', listener)
+  },
+  onDeviceEvent: (callback: (event: unknown) => void) => {
+    const listener = (_e: Electron.IpcRendererEvent, event: unknown): void => callback(event)
+    ipcRenderer.on('device-event', listener)
+    return () => ipcRenderer.removeListener('device-event', listener)
+  },
+  sendLiveConfig: (config: unknown) => ipcRenderer.send('device-live-config', config),
+  sendSavedConfig: (config: unknown) => ipcRenderer.send('device-saved-config', config),
+  openPretendDevice: () => ipcRenderer.send('open-pretend-device'),
+
   // Settings file
   loadConfig: () => ipcRenderer.invoke('config-load'),
   saveConfig: (config: unknown) => ipcRenderer.invoke('config-save', config),

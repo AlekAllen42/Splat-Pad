@@ -7,14 +7,14 @@ import { useT } from '../i18n'
 export default function NoticeToast({ notice, onClose }: { notice: Notice | null; onClose: () => void }): React.JSX.Element | null {
   const t = useT()
   useEffect(() => {
-    if (notice?.kind !== 'ok') return
+    if (notice?.kind !== 'ok' && notice?.kind !== 'info') return
     const timer = window.setTimeout(onClose, 2200)
     return () => window.clearTimeout(timer)
   }, [notice, onClose])
 
   if (!notice) return null
   return (
-    <div className={`notice notice-${notice.kind}`} role={notice.kind === 'ok' ? 'status' : 'alert'}>
+    <div className={`notice notice-${notice.kind}`} role={notice.kind === 'ok' || notice.kind === 'info' ? 'status' : 'alert'}>
       <div>
         <strong>{notice.kind === 'ok' ? `✓ ${notice.text}` : notice.text}</strong>
         {notice.details && (
@@ -25,7 +25,7 @@ export default function NoticeToast({ notice, onClose }: { notice: Notice | null
           </ul>
         )}
       </div>
-      {notice.kind !== 'ok' && (
+      {notice.kind !== 'ok' && notice.kind !== 'info' && (
         <button className="icon-btn" aria-label={t.closeMessage} onClick={onClose}>
           ✕
         </button>

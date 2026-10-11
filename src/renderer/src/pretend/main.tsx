@@ -1,0 +1,15 @@
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import '@fontsource/inter/400.css'
+import '@fontsource/inter/600.css'
+import '@fontsource/inter/700.css'
+import '@fontsource/fraunces/700.css'
+import PretendDevice from './PretendDevice'
+import '../styles.css'
+import './pretend.css'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <PretendDevice />
+  </StrictMode>
+)

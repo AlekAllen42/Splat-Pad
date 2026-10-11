@@ -8,6 +8,12 @@ interface PickedProgram {
 
 // What the preload script exposes on `window` (see src/preload/index.ts).
 interface Window {
+  // Only in the pretend Splat Pad window (src/preload/pretend.ts): its "USB cable".
+  pretendWire?: {
+    ready: () => void
+    send: (line: string) => void
+    onLine: (callback: (line: string) => void) => () => void
+  }
   splatPad: {
     platform: string
     // Opens a file picker; resolves to null if the user cancels.
@@ -22,6 +28,14 @@ interface Window {
     testOpen: (kind: "launch" | "url", target: string) => Promise<{ ok: boolean; error?: string }>
     getVolume: () => Promise<number | null>
     setVolume: (value: number) => Promise<boolean>
+
+    // Device connection (real or pretend Splat Pad); the on* functions return an "unsubscribe".
+    getDeviceStatus: () => Promise<import('../../shared/protocol').ConnectionStatus>
+    onDeviceStatus: (callback: (status: import('../../shared/protocol').ConnectionStatus) => void) => () => void
+    onDeviceEvent: (callback: (event: import('../../shared/protocol').DeviceEvent) => void) => () => void
+    sendLiveConfig: (config: unknown) => void
+    sendSavedConfig: (config: unknown) => void
+    openPretendDevice: () => void
 
     // Settings file. loadConfig: config is null when nothing has been saved yet.
     loadConfig: () => Promise<{ config: import('../../shared/config').Config | null; warning?: string }>

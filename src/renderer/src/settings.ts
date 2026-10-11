@@ -3,7 +3,7 @@ import { DEFAULT_CONFIG, type Config } from '../../shared/config'
 import { detectLanguage, stringsFor, type Strings } from '../../shared/i18n'
 
 export interface Notice {
-  kind: 'ok' | 'error' | 'warning'
+  kind: 'ok' | 'info' | 'error' | 'warning' // ok gets a checkmark; ok and info fade on their own
   text: string
   details?: string[]
 }
@@ -38,6 +38,7 @@ export interface Settings {
   discard: () => void
   notice: Notice | null
   clearNotice: () => void
+  showNotice: (notice: Notice) => void
 }
 
 // Loads the saved settings, tracks edits, and saves/discards them.
@@ -55,6 +56,7 @@ export function useSettings(): Settings {
       const start = config ?? { ...DEFAULT_CONFIG, language: detectLanguage(navigator.language) }
       setSaved(start)
       setDraft(start)
+      window.splatPad.sendSavedConfig(start) // so a connected device gets the saved copy
       if (warning) setNotice({ kind: 'warning', text: warning })
       setReady(true)
     })
@@ -67,6 +69,12 @@ export function useSettings(): Settings {
     window.splatPad.setUnsaved(unsaved)
   }, [unsaved])
 
+  // Every edit goes to a connected device as a live preview (the main
+  // process waits for edits to pause before sending).
+  useEffect(() => {
+    if (ready) window.splatPad.sendLiveConfig(draft)
+  }, [draft, ready])
+
   // the main process needs the language for the close dialog and file pickers
   useEffect(() => {
     window.splatPad.setLanguage(draft.language)
@@ -77,6 +85,7 @@ export function useSettings(): Settings {
     const result = await window.splatPad.saveConfig(toSave)
     if (result.ok) {
       setSaved(toSave)
+      window.splatPad.sendSavedConfig(toSave) // the device writes it to its card
       setNotice({ kind: 'ok', text: stringsFor(toSave.language).saved })
       return true
     }
@@ -122,6 +131,7 @@ export function useSettings(): Settings {
     save,
     discard,
     notice,
-    clearNotice: () => setNotice(null)
+    clearNotice: () => setNotice(null),
+    showNotice: setNotice
   }
 }

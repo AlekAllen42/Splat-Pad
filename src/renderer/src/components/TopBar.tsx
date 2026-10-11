@@ -123,6 +123,17 @@ export default function TopBar({
                   role="menuitem"
                   className="menu-item"
                   onClick={() => {
+                    window.splatPad.openPretendDevice()
+                    setMenuOpen(false)
+                  }}
+                >
+                  <span className="menu-check" />
+                  {t.openPretend}
+                </button>
+                <button
+                  role="menuitem"
+                  className="menu-item"
+                  onClick={() => {
                     window.splatPad.showConfigFile()
                     setMenuOpen(false)
                   }}
