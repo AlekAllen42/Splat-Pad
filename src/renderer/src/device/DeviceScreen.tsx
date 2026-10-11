@@ -4,6 +4,7 @@ import Carousel from './Carousel'
 import { Clock, ControlsButton, Favorites, Presets, SliderPanel } from './widgets'
 import { useFitScale } from './useFitScale'
 import { runApp, runSlider } from './testRunner'
+import { useT } from '../i18n'
 import './device.css'
 
 const BEZEL = 22 // frame around the screen, in device pixels (preview only)
@@ -11,6 +12,7 @@ const BEZEL = 22 // frame around the screen, in device pixels (preview only)
 // A working stand-in for the Splat Pad's 800x480 screen.
 // testMode: taps really open apps/websites and change the volume on this PC.
 export default function DeviceScreen({ config, testMode }: { config: Config; testMode: boolean }): React.JSX.Element {
+  const t = useT()
   const [fitRef, scale] = useFitScale(SCREEN_WIDTH + BEZEL * 2, SCREEN_HEIGHT + BEZEL * 2)
   const [panelOpen, setPanelOpen] = useState(false)
   const [sliderValues, setSliderValues] = useState<Record<string, number>>({})
@@ -31,16 +33,16 @@ export default function DeviceScreen({ config, testMode }: { config: Config; tes
     setPressedId(app.id)
     window.setTimeout(() => setPressedId(null), 160)
     if (testMode) {
-      void runApp(app, config).then((messages) => showToast(messages.join(' · '), 2600))
+      void runApp(app, config, t).then((messages) => showToast(messages.join(' · '), 2600))
     } else if (config.behavior.showOpenMessage) {
-      showToast(`Opening ${app.name}`)
+      showToast(t.opening(app.name))
     }
   }
 
   const setSlider = (id: string, value: number): void => {
     setSliderValues((vals) => ({ ...vals, [id]: value }))
     const slider = config.sliders.find((s) => s.id === id)
-    if (testMode && slider) void runSlider(slider, value).then((msg) => showToast(msg))
+    if (testMode && slider) void runSlider(slider, value, t).then((msg) => showToast(msg))
   }
 
   // Entering test mode: start the volume sliders from the PC's real volume.
@@ -90,7 +92,7 @@ export default function DeviceScreen({ config, testMode }: { config: Config; tes
     <div ref={fitRef} className={`device-fit ${testMode ? 'is-testing' : ''}`}>
       {testMode && (
         <div className="test-badge" role="status">
-          TEST MODE · taps run on this PC
+          {t.testBadge}
         </div>
       )}
       <div

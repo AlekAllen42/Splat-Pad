@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DEFAULT_CONFIG, type Config } from '../../shared/config'
+import { detectLanguage, stringsFor, type Strings } from '../../shared/i18n'
 
 export interface Notice {
   kind: 'ok' | 'error' | 'warning'
@@ -8,12 +9,13 @@ export interface Notice {
 }
 
 // Turns "apps[3].name: must be non-empty text" into "App 4: name must be non-empty text".
-function friendly(error: string, config: Config): string {
+// TODO(i18n): the detail after the colon still comes from the English validator.
+function friendly(error: string, config: Config, t: Strings): string {
   const lists: [keyof Config, string, (i: number) => string | undefined][] = [
-    ['apps', 'App', (i) => config.apps[i]?.name],
-    ['sliders', 'Slider', (i) => config.sliders[i]?.label],
-    ['presets', 'Preset', (i) => config.presets[i]?.name],
-    ['layout', 'Screen piece', () => undefined]
+    ['apps', t.errorApp, (i) => config.apps[i]?.name],
+    ['sliders', t.errorSlider, (i) => config.sliders[i]?.label],
+    ['presets', t.errorPreset, (i) => config.presets[i]?.name],
+    ['layout', t.errorPiece, () => undefined]
   ]
   for (const [key, label, nameOf] of lists) {
     const m = error.match(new RegExp(`^${key}\\[(\\d+)\\]\\.?([^:]*):\\s*(.*)$`))
@@ -49,7 +51,8 @@ export function useSettings(): Settings {
 
   useEffect(() => {
     void window.splatPad.loadConfig().then(({ config, warning }) => {
-      const start = config ?? DEFAULT_CONFIG
+      // first launch: use the computer's language if we have it
+      const start = config ?? { ...DEFAULT_CONFIG, language: detectLanguage(navigator.language) }
       setSaved(start)
       setDraft(start)
       if (warning) setNotice({ kind: 'warning', text: warning })
@@ -64,25 +67,30 @@ export function useSettings(): Settings {
     window.splatPad.setUnsaved(unsaved)
   }, [unsaved])
 
+  // the main process needs the language for the close dialog and file pickers
+  useEffect(() => {
+    window.splatPad.setLanguage(draft.language)
+  }, [draft.language])
+
   const save = useCallback(async (): Promise<boolean> => {
     const toSave = draftRef.current
     const result = await window.splatPad.saveConfig(toSave)
     if (result.ok) {
       setSaved(toSave)
-      setNotice({ kind: 'ok', text: 'Saved' })
+      setNotice({ kind: 'ok', text: stringsFor(toSave.language).saved })
       return true
     }
     setNotice({
       kind: 'error',
-      text: 'Couldn’t save. Please fix these first:',
-      details: result.errors.slice(0, 6).map((e) => friendly(e, toSave))
+      text: stringsFor(toSave.language).cantSave,
+      details: result.errors.slice(0, 6).map((e) => friendly(e, toSave, stringsFor(toSave.language)))
     })
     return false
   }, [])
 
   const discard = useCallback(() => {
     setDraft(saved)
-    setNotice({ kind: 'ok', text: 'Changes discarded' })
+    setNotice({ kind: 'ok', text: stringsFor(saved.language).discarded })
   }, [saved])
 
   // Ctrl+S (Cmd+S on Mac) saves.

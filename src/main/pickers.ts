@@ -1,6 +1,7 @@
 import { app, BrowserWindow, dialog, ipcMain, nativeImage, shell } from 'electron'
 import { readFile } from 'fs/promises'
 import { basename, extname, join } from 'path'
+import { t } from './language'
 
 export interface PickedProgram {
   name: string
@@ -20,16 +21,16 @@ function defaultProgramFolder(): string | undefined {
 
 async function pickProgram(win: BrowserWindow): Promise<PickedProgram | null> {
   const result = await dialog.showOpenDialog(win, {
-    title: 'Choose a program',
+    title: t().chooseProgram,
     defaultPath: defaultProgramFolder(),
     properties: ['openFile'],
     filters:
       process.platform === 'win32'
         ? [
-            { name: 'Programs and shortcuts', extensions: ['exe', 'lnk', 'bat', 'cmd'] },
-            { name: 'All files', extensions: ['*'] }
+            { name: t().programFiles, extensions: ['exe', 'lnk', 'bat', 'cmd'] },
+            { name: t().allFiles, extensions: ['*'] }
           ]
-        : [{ name: 'All files', extensions: ['*'] }]
+        : [{ name: t().allFiles, extensions: ['*'] }]
   })
   if (result.canceled || result.filePaths.length === 0) return null
   return describeProgram(result.filePaths[0])
@@ -62,9 +63,9 @@ export async function describeProgram(picked: string): Promise<PickedProgram> {
 
 async function pickImage(win: BrowserWindow): Promise<string | null> {
   const result = await dialog.showOpenDialog(win, {
-    title: 'Choose an icon image',
+    title: t().chooseIcon,
     properties: ['openFile'],
-    filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp', 'svg'] }]
+    filters: [{ name: t().images, extensions: ['png', 'jpg', 'jpeg', 'webp', 'svg'] }]
   })
   if (result.canceled || result.filePaths.length === 0) return null
   const file = result.filePaths[0]

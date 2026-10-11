@@ -5,19 +5,11 @@ import {
   SCREEN_HEIGHT,
   SCREEN_WIDTH,
   type Theme,
-  type Widget,
-  type WidgetType
+  type Widget
 } from '../../../shared/config'
 import { useFitScale } from '../device/useFitScale'
+import { useT } from '../i18n'
 import './editor.css'
-
-export const WIDGET_NAMES: Record<WidgetType, string> = {
-  clock: 'Clock',
-  carousel: 'App carousel',
-  favorites: 'Favorites',
-  presets: 'Presets',
-  controls: 'Sliders button'
-}
 
 // Which edges a handle moves: n = top, s = bottom, e = right, w = left.
 type Handle = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw'
@@ -57,6 +49,7 @@ interface Props {
 }
 
 export default function LayoutEditor({ layout, theme, onChange, onReset }: Props): React.JSX.Element {
+  const t = useT()
   const [fitRef, scale] = useFitScale(SCREEN_WIDTH + 8, SCREEN_HEIGHT + 8)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const drag = useRef<{ id: string; mode: 'move' | Handle; startX: number; startY: number; start: Widget } | null>(null)
@@ -137,7 +130,7 @@ export default function LayoutEditor({ layout, theme, onChange, onReset }: Props
                 onPointerUp={endDrag}
                 onPointerCancel={endDrag}
               >
-                <span className="le-box-name">{WIDGET_NAMES[wgt.type]}</span>
+                <span className="le-box-name">{t.widget[wgt.type]}</span>
                 <span className="le-box-size">
                   {wgt.w} × {wgt.h}
                 </span>
@@ -161,19 +154,19 @@ export default function LayoutEditor({ layout, theme, onChange, onReset }: Props
       <div className="le-toolbar">
         {selected ? (
           <>
-            <strong>{WIDGET_NAMES[selected.type]}</strong>
+            <strong>{t.widget[selected.type]}</strong>
             <span className="le-readout">
               x {selected.x} · y {selected.y} · {selected.w} × {selected.h}
             </span>
             <button className="btn btn-small" onClick={() => remove(selected.id)}>
-              Remove
+              {t.remove}
             </button>
           </>
         ) : (
-          <span className="le-hint">Click a piece to select it. Drag to move, drag edges to resize.</span>
+          <span className="le-hint">{t.layoutHint}</span>
         )}
         <button className="btn btn-small le-reset" onClick={onReset}>
-          Reset layout
+          {t.resetLayout}
         </button>
       </div>
     </div>

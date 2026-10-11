@@ -1,8 +1,10 @@
 import type { Config, Theme } from '../../../shared/config'
 import { ColorInput, Toggle } from './controls'
 import type { ConfigUpdate } from './helpers'
+import { useT } from '../i18n'
+import type { Strings } from '../../../shared/i18n'
 
-const THEMES: { name: string; theme: Theme }[] = [
+const THEMES: { name: keyof Strings['themeName']; theme: Theme }[] = [
   { name: 'Paper', theme: { background: '#f6f3ec', surface: '#efe8d9', accent: '#e2562c', text: '#1b1711' } },
   { name: 'Ink', theme: { background: '#15120e', surface: '#26211a', accent: '#ec6a40', text: '#f1eadf' } },
   { name: 'Midnight', theme: { background: '#0f1115', surface: '#1c2029', accent: '#4f8cff', text: '#f2f3f5' } },
@@ -11,11 +13,12 @@ const THEMES: { name: string; theme: Theme }[] = [
   { name: 'Sunset', theme: { background: '#fff4e6', surface: '#ffe0bd', accent: '#d9480f', text: '#3b1d0b' } }
 ]
 
-const FIELDS: { key: keyof Theme; label: string; hint: string }[] = [
-  { key: 'accent', label: 'Accent', hint: 'Highlights, AM/PM, sliders button and slider fill' },
-  { key: 'background', label: 'Background', hint: 'Behind everything' },
-  { key: 'surface', label: 'Panels', hint: 'Buttons and slider tracks' },
-  { key: 'text', label: 'Text & outlines', hint: 'Words, borders and shadows' }
+// label/hint are keys into the translations
+const FIELDS: { key: keyof Theme; label: keyof Strings; hint: keyof Strings }[] = [
+  { key: 'accent', label: 'colorAccent', hint: 'colorAccentHint' },
+  { key: 'background', label: 'colorBackground', hint: 'colorBackgroundHint' },
+  { key: 'surface', label: 'colorSurface', hint: 'colorSurfaceHint' },
+  { key: 'text', label: 'colorText', hint: 'colorTextHint' }
 ]
 
 const same = (a: Theme, b: Theme): boolean => FIELDS.every(({ key }) => a[key].toLowerCase() === b[key].toLowerCase())
@@ -36,16 +39,17 @@ function ClockColorRow({
   fallback: string
   onChange: (v: string | undefined) => void
 }): React.JSX.Element {
+  const t = useT()
   return (
     <li className="lib-color-row">
       <ColorInput label={label} value={value ?? fallback} onChange={onChange} />
       <div>
         <strong>{label}</strong>
-        <span>{value ? hint : `${hint} (using the theme)`}</span>
+        <span>{value ? hint : t.usingTheme(hint)}</span>
       </div>
       {value && (
         <button className="btn btn-small" onClick={() => onChange(undefined)}>
-          Reset
+          {t.reset}
         </button>
       )}
     </li>
@@ -53,6 +57,8 @@ function ClockColorRow({
 }
 
 export default function ColorsTab({ config, update }: { config: Config; update: ConfigUpdate }): React.JSX.Element {
+  const t = useT()
+  const text = (key: keyof Strings): string => t[key] as string
   const setTheme = (theme: Theme): void => update((c) => ({ ...c, theme }))
   const { clock, theme } = config
   const setClockColor = (key: ClockColorKey, value: string | undefined): void =>
@@ -66,7 +72,7 @@ export default function ColorsTab({ config, update }: { config: Config; update: 
   return (
     <div className="lib-tab">
       <section className="lib-section">
-        <h3>Themes</h3>
+        <h3>{t.themes}</h3>
         <div className="lib-themes">
           {THEMES.map(({ name, theme }) => (
             <button
@@ -78,21 +84,21 @@ export default function ColorsTab({ config, update }: { config: Config; update: 
                 <span style={{ background: theme.surface, borderColor: theme.text }} />
                 <span style={{ background: theme.accent }} />
               </span>
-              {name}
+              {t.themeName[name]}
             </button>
           ))}
         </div>
       </section>
 
       <section className="lib-section">
-        <h3>Custom colors</h3>
+        <h3>{t.customColors}</h3>
         <ul className="lib-list">
           {FIELDS.map(({ key, label, hint }) => (
             <li key={key} className="lib-color-row">
-              <ColorInput label={label} value={config.theme[key]} onChange={(v) => setTheme({ ...config.theme, [key]: v })} />
+              <ColorInput label={text(label)} value={config.theme[key]} onChange={(v) => setTheme({ ...config.theme, [key]: v })} />
               <div>
-                <strong>{label}</strong>
-                <span>{hint}</span>
+                <strong>{text(label)}</strong>
+                <span>{text(hint)}</span>
               </div>
               <code>{config.theme[key]}</code>
             </li>
@@ -101,18 +107,18 @@ export default function ColorsTab({ config, update }: { config: Config; update: 
       </section>
 
       <section className="lib-section">
-        <h3>Clock</h3>
+        <h3>{t.clock}</h3>
         <ul className="lib-list">
           <ClockColorRow
-            label="Time"
-            hint="The big numbers"
+            label={t.colorTime}
+            hint={t.colorTimeHint}
             value={clock.timeColor}
             fallback={theme.text}
             onChange={(v) => setClockColor('timeColor', v)}
           />
         </ul>
         <Toggle
-          label="Separate date and AM/PM colors"
+          label={t.separateClockColors}
           checked={separate}
           onChange={(on) =>
             update((c) => {
@@ -132,22 +138,22 @@ export default function ColorsTab({ config, update }: { config: Config; update: 
         {separate ? (
           <ul className="lib-list">
             <ClockColorRow
-              label="Date"
-              hint="Day and date under the time"
+              label={t.colorDate}
+              hint={t.colorDateHint}
               value={clock.dateColor}
               fallback={theme.text}
               onChange={(v) => setClockColor('dateColor', v)}
             />
             <ClockColorRow
-              label="AM / PM"
-              hint="Shown with the 12-hour clock"
+              label={t.colorAmpm}
+              hint={t.colorAmpmHint}
               value={clock.ampmColor}
               fallback={theme.accent}
               onChange={(v) => setClockColor('ampmColor', v)}
             />
           </ul>
         ) : (
-          <p className="lib-hint">The date uses the text color and AM/PM uses the accent color.</p>
+          <p className="lib-hint">{t.clockColorsDefault}</p>
         )}
       </section>
     </div>

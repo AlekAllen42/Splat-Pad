@@ -1,21 +1,23 @@
 import { removeSlider, type Config, type Preset, type Slider, type SliderKind } from '../../../shared/config'
 import { makeId, type ConfigUpdate } from './helpers'
-
-const KINDS: { value: SliderKind; label: string; needsTarget?: string }[] = [
-  { value: 'masterVolume', label: 'Volume' },
-  { value: 'brightness', label: 'Screen brightness' },
-  { value: 'appVolume', label: 'App volume', needsTarget: 'Program, e.g. spotify.exe' },
-  { value: 'device', label: 'Device', needsTarget: 'Device name' }
-]
+import { useT } from '../i18n'
 
 export default function ControlsTab({ config, update }: { config: Config; update: ConfigUpdate }): React.JSX.Element {
+  const t = useT()
+  const KINDS: { value: SliderKind; label: string; needsTarget?: string }[] = [
+    { value: 'masterVolume', label: t.kindVolume },
+    { value: 'brightness', label: t.kindBrightness },
+    { value: 'appVolume', label: t.kindAppVolume, needsTarget: t.targetProgram },
+    { value: 'device', label: t.kindDevice, needsTarget: t.targetDevice }
+  ]
+
   const setSlider = (next: Slider): void =>
     update((c) => ({ ...c, sliders: c.sliders.map((s) => (s.id === next.id ? next : s)) }))
 
   const addSlider = (): void =>
     update((c) => ({
       ...c,
-      sliders: [...c.sliders, { id: makeId('volume', c.sliders.map((s) => s.id)), kind: 'masterVolume', label: 'Volume' }]
+      sliders: [...c.sliders, { id: makeId('volume', c.sliders.map((s) => s.id)), kind: 'masterVolume', label: t.newSliderLabel }]
     }))
 
   // Also removes it from every preset and custom button.
@@ -31,7 +33,7 @@ export default function ControlsTab({ config, update }: { config: Config; update
         ...c.presets,
         {
           id: makeId('preset', c.presets.map((p) => p.id)),
-          name: `Preset ${c.presets.length + 1}`,
+          name: t.newPresetName(c.presets.length + 1),
           values: Object.fromEntries(c.sliders.map((s) => [s.id, 50]))
         }
       ]
@@ -41,9 +43,9 @@ export default function ControlsTab({ config, update }: { config: Config; update
     <div className="lib-tab">
       <section className="lib-section">
         <div className="lib-section-head">
-          <h3>Sliders</h3>
+          <h3>{t.sliders}</h3>
           <button className="btn btn-small" onClick={addSlider}>
-            + Add slider
+            {t.addSlider}
           </button>
         </div>
         <ul className="lib-list">
@@ -54,13 +56,13 @@ export default function ControlsTab({ config, update }: { config: Config; update
                 <input
                   className="lib-input"
                   value={s.label}
-                  aria-label="Slider name"
+                  aria-label={t.sliderName}
                   onChange={(e) => setSlider({ ...s, label: e.target.value })}
                 />
                 <select
                   className="lib-input"
                   value={s.kind}
-                  aria-label="What it controls"
+                  aria-label={t.whatItControls}
                   onChange={(e) => {
                     const k = e.target.value as SliderKind
                     const needsTarget = KINDS.find((x) => x.value === k)?.needsTarget
@@ -84,7 +86,7 @@ export default function ControlsTab({ config, update }: { config: Config; update
                 ) : (
                   <span />
                 )}
-                <button className="lib-icon-btn lib-remove" aria-label={`Remove ${s.label}`} onClick={() => removeSliderById(s.id)}>
+                <button className="lib-icon-btn lib-remove" aria-label={t.removeNamed(s.label)} onClick={() => removeSliderById(s.id)}>
                   ✕
                 </button>
               </li>
@@ -95,9 +97,9 @@ export default function ControlsTab({ config, update }: { config: Config; update
 
       <section className="lib-section">
         <div className="lib-section-head">
-          <h3>Presets</h3>
+          <h3>{t.presets}</h3>
           <button className="btn btn-small" onClick={addPreset}>
-            + Add preset
+            {t.addPreset}
           </button>
         </div>
         <ul className="lib-list">
@@ -107,12 +109,12 @@ export default function ControlsTab({ config, update }: { config: Config; update
                 <input
                   className="lib-input"
                   value={p.name}
-                  aria-label="Preset name"
+                  aria-label={t.presetName}
                   onChange={(e) => setPreset({ ...p, name: e.target.value })}
                 />
                 <button
                   className="lib-icon-btn lib-remove"
-                  aria-label={`Remove ${p.name}`}
+                  aria-label={t.removeNamed(p.name)}
                   onClick={() => update((c) => ({ ...c, presets: c.presets.filter((x) => x.id !== p.id) }))}
                 >
                   ✕
@@ -141,7 +143,7 @@ export default function ControlsTab({ config, update }: { config: Config; update
                       max={100}
                       disabled={!set}
                       value={p.values[s.id] ?? 50}
-                      aria-label={`${s.label} in ${p.name}`}
+                      aria-label={t.sliderInPreset(s.label, p.name)}
                       onChange={(e) => setPreset({ ...p, values: { ...p.values, [s.id]: Number(e.target.value) } })}
                     />
                     <span>{set ? `${p.values[s.id]}%` : '—'}</span>

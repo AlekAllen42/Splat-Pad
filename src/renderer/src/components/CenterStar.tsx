@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useT } from '../i18n'
 
 // The ✱ in the middle of the window, sitting in the circle cut out of the
 // four panels' inner corners. Spins on hover; clicking toggles test mode
@@ -6,13 +7,14 @@ import { useState } from 'react'
 export default function CenterStar({ active, onToggle }: { active: boolean; onToggle: () => void }): React.JSX.Element {
   // Each hover adds a full turn, so it always spins forward, never back.
   const [turns, setTurns] = useState(0)
+  const t = useT()
 
   return (
     <button
       className={`center-star ${active ? 'is-active' : ''}`}
       aria-pressed={active}
-      aria-label={active ? 'Turn off test mode' : 'Turn on test mode'}
-      title={active ? 'Test mode is on: click to turn off' : 'Test mode: make taps on the live screen run on this PC'}
+      aria-label={active ? t.testModeOff : t.testModeOn}
+      title={active ? t.testModeTitleOn : t.testModeTitleOff}
       onPointerEnter={() => setTurns((t) => t + 1)}
       onClick={onToggle}
     >

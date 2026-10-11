@@ -1,13 +1,15 @@
 import { useEffect } from 'react'
 import type { Notice } from '../settings'
+import { useT } from '../i18n'
 
 // A message at the bottom of the window. Success messages fade on their own;
 // errors and warnings stay until closed.
 export default function NoticeToast({ notice, onClose }: { notice: Notice | null; onClose: () => void }): React.JSX.Element | null {
+  const t = useT()
   useEffect(() => {
     if (notice?.kind !== 'ok') return
-    const t = window.setTimeout(onClose, 2200)
-    return () => window.clearTimeout(t)
+    const timer = window.setTimeout(onClose, 2200)
+    return () => window.clearTimeout(timer)
   }, [notice, onClose])
 
   if (!notice) return null
@@ -24,7 +26,7 @@ export default function NoticeToast({ notice, onClose }: { notice: Notice | null
         )}
       </div>
       {notice.kind !== 'ok' && (
-        <button className="icon-btn" aria-label="Close message" onClick={onClose}>
+        <button className="icon-btn" aria-label={t.closeMessage} onClick={onClose}>
           ✕
         </button>
       )}

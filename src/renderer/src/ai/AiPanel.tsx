@@ -5,6 +5,7 @@ import { attachSiteIcon, describeAction, type ConfigUpdate } from '../library/he
 import { applyCreation, respond, type Creation, type Reply } from './mockAssistant'
 import { useReviewOutbox } from './reviewOutbox'
 import './ai.css'
+import { useT } from '../i18n'
 
 interface Message {
   id: number
@@ -14,17 +15,11 @@ interface Message {
   reply?: Reply
 }
 
-const EXAMPLES = [
-  'A button that opens Spotify and Discord and sets volume to 40',
-  'A study mode with volume 20 and brightness 70',
-  'Make it dark purple',
-  'A button for youtube.com'
-]
-
 const THINKING_MS = 700 // pretend thinking time, so the demo feels like the real thing
 
 // What a creation will look like, shown on its card.
 function CreationPreview({ creation, config }: { creation: Creation; config: Config }): React.JSX.Element {
+  const t = useT()
   switch (creation.kind) {
     case 'button':
       return (
@@ -38,7 +33,7 @@ function CreationPreview({ creation, config }: { creation: Creation; config: Con
           />
           <div>
             <strong>{creation.app.name}</strong>
-            <span>{describeAction(creation.app.action, config)}</span>
+            <span>{describeAction(creation.app.action, config, t)}</span>
           </div>
         </div>
       )
@@ -47,7 +42,7 @@ function CreationPreview({ creation, config }: { creation: Creation; config: Con
         <div className="ai-preview">
           <div className="ai-preview-preset">{creation.preset.name}</div>
           <div>
-            <strong>Preset</strong>
+            <strong>{t.presetWord}</strong>
             <span>
               {Object.entries(creation.preset.values)
                 .map(([id, v]) => `${config.sliders.find((s) => s.id === id)?.label ?? id} ${v}%`)
@@ -67,8 +62,8 @@ function CreationPreview({ creation, config }: { creation: Creation; config: Con
             <span style={{ background: creation.theme.accent }} />
           </div>
           <div>
-            <strong>{creation.name} theme</strong>
-            <span>Replaces your current screen colors</span>
+            <strong>{t.themeTitle(t.themeName[creation.name])}</strong>
+            <span>{t.replacesColors}</span>
           </div>
         </div>
       )
@@ -86,6 +81,7 @@ function ReplyCard({
   onAdd: (creation: Creation) => void
   onSendForReview: () => void
 }): React.JSX.Element {
+  const t = useT()
   const [review, setReview] = useState(false)
   const [added, setAdded] = useState(false)
   const [sent, setSent] = useState(false)
@@ -100,13 +96,14 @@ function ReplyCard({
           <CreationPreview creation={reply.creation} config={config} />
           {added ? (
             <p className="ai-done">
-              ✓ Added to your Splat Pad{sent ? ' · waiting to send to 42 Potential' : ''}
+              {t.addedToPad}
+              {sent ? t.waitingToSend : ''}
             </p>
           ) : (
             <div className="ai-card-actions">
               <label className="ai-review">
                 <input type="checkbox" checked={review} onChange={(e) => setReview(e.target.checked)} />
-                Send to 42 Potential for review, so it could become a preset for everyone
+                {t.sendForReview}
               </label>
               <button
                 className="btn btn-small btn-primary"
@@ -119,7 +116,7 @@ function ReplyCard({
                   setAdded(true)
                 }}
               >
-                Add to Splat Pad
+                {t.addToPad}
               </button>
             </div>
           )}
@@ -128,7 +125,7 @@ function ReplyCard({
 
       {reply.idea &&
         (sent ? (
-          <p className="ai-done">✓ Idea saved, waiting to send to 42 Potential</p>
+          <p className="ai-done">{t.ideaSaved}</p>
         ) : (
           <button
             className="btn btn-small"
@@ -137,7 +134,7 @@ function ReplyCard({
               setSent(true)
             }}
           >
-            Send idea to 42 Potential for review
+            {t.sendIdea}
           </button>
         ))}
     </div>
@@ -145,6 +142,7 @@ function ReplyCard({
 }
 
 export default function AiPanel({ config, update }: { config: Config; update: ConfigUpdate }): React.JSX.Element {
+  const t = useT()
   const [messages, setMessages] = useState<Message[]>([])
   const [draft, setDraft] = useState('')
   const [thinking, setThinking] = useState(false)
@@ -153,6 +151,8 @@ export default function AiPanel({ config, update }: { config: Config; update: Co
   const listRef = useRef<HTMLDivElement>(null)
   const configRef = useRef(config)
   configRef.current = config
+  const tRef = useRef(t)
+  tRef.current = t
 
   // keep the newest message in view
   useEffect(() => {
@@ -166,7 +166,7 @@ export default function AiPanel({ config, update }: { config: Config; update: Co
     setMessages((m) => [...m, { id: nextId.current++, from: 'user', text: request }])
     setThinking(true)
     window.setTimeout(() => {
-      const reply = respond(request, configRef.current)
+      const reply = respond(request, configRef.current, tRef.current)
       setMessages((m) => [...m, { id: nextId.current++, from: 'assistant', text: reply.message, request, reply }])
       setThinking(false)
     }, THINKING_MS)
@@ -175,15 +175,15 @@ export default function AiPanel({ config, update }: { config: Config; update: Co
   return (
     <div className="ai-panel">
       <div className="ai-demo-note">
-        Demo mode: answers are pretend until AI is connected through 42potential.com.
+        {t.aiDemo}
       </div>
 
       <div ref={listRef} className="ai-messages">
         {messages.length === 0 && (
           <div className="ai-empty">
-            <p>Describe something you want your Splat Pad to do. Try:</p>
+            <p>{t.aiIntro}</p>
             <div className="ai-examples">
-              {EXAMPLES.map((ex) => (
+              {t.aiExamples.map((ex) => (
                 <button key={ex} className="ai-example" onClick={() => send(ex)}>
                   {ex}
                 </button>
@@ -211,7 +211,7 @@ export default function AiPanel({ config, update }: { config: Config; update: Co
           )
         )}
         {thinking && (
-          <div className="ai-msg ai-msg-assistant ai-thinking" aria-label="Thinking">
+          <div className="ai-msg ai-msg-assistant ai-thinking" aria-label={t.thinking}>
             <span />
             <span />
             <span />
@@ -230,8 +230,8 @@ export default function AiPanel({ config, update }: { config: Config; update: Co
           className="lib-input"
           rows={2}
           value={draft}
-          placeholder="e.g. a button that opens Discord and sets volume to 30"
-          aria-label="Describe what you want"
+          placeholder={t.aiPlaceholder}
+          aria-label={t.aiInputLabel}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
             // Enter sends; Shift+Enter starts a new line
@@ -242,15 +242,12 @@ export default function AiPanel({ config, update }: { config: Config; update: Co
           }}
         />
         <button className="btn btn-primary" type="submit" disabled={!draft.trim() || thinking}>
-          Send
+          {t.send}
         </button>
       </form>
 
       {outbox.length > 0 && (
-        <p className="ai-outbox">
-          {outbox.length} {outbox.length === 1 ? 'item is' : 'items are'} waiting to send to 42 Potential for review. Sending
-          starts once the app is connected to 42potential.com.
-        </p>
+        <p className="ai-outbox">{t.outbox(outbox.length)}</p>
       )}
     </div>
   )

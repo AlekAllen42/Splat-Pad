@@ -1,4 +1,5 @@
 // Small form controls shared by the Library tabs.
+import { useT } from '../i18n'
 
 export function Toggle({
   checked,
@@ -57,13 +58,14 @@ export function Stepper({
   onChange: (v: number) => void
   label: string
 }): React.JSX.Element {
+  const t = useT()
   return (
     <div className="lib-stepper" aria-label={label}>
-      <button aria-label={`Fewer ${label}`} disabled={value <= min} onClick={() => onChange(value - 1)}>
+      <button aria-label={t.fewer(label)} disabled={value <= min} onClick={() => onChange(value - 1)}>
         −
       </button>
       <span>{value}</span>
-      <button aria-label={`More ${label}`} disabled={value >= max} onClick={() => onChange(value + 1)}>
+      <button aria-label={t.more(label)} disabled={value >= max} onClick={() => onChange(value + 1)}>
         +
       </button>
     </div>

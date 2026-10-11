@@ -9,6 +9,8 @@ import Library from './library/Library'
 import AiPanel from './ai/AiPanel'
 import { useAppTheme } from './appTheme'
 import { useSettings } from './settings'
+import { LanguageProvider } from './i18n'
+import { stringsFor } from '../../shared/i18n'
 import { DEFAULT_CONFIG } from '../../shared/config'
 
 export default function App(): React.JSX.Element {
@@ -17,13 +19,18 @@ export default function App(): React.JSX.Element {
   const { config, update } = settings
   const [testMode, setTestMode] = useState(false) // not saved; always starts off
 
-  if (!settings.ready) return <div className="app-loading">Loading your Splat Pad…</div>
+  const t = stringsFor(config.language)
+
+  if (!settings.ready) return <div className="app-loading">{t.loading}</div>
 
   return (
+    <LanguageProvider language={config.language}>
     <div className="app">
       <TopBar
         themeMode={themeMode}
         onThemeModeChange={setThemeMode}
+        language={config.language}
+        onLanguageChange={(language) => update((c) => ({ ...c, language }))}
         unsaved={settings.unsaved}
         onSave={() => void settings.save()}
         onDiscard={settings.discard}
@@ -32,12 +39,12 @@ export default function App(): React.JSX.Element {
       <main className="quadrants">
         <Panel
           className="panel-tl"
-          title="Live screen"
-          subtitle={testMode ? 'Test mode: taps open apps and change volume on this PC' : 'What your Splat Pad shows right now'}
+          title={t.liveScreen}
+          subtitle={testMode ? t.liveScreenTestSub : t.liveScreenSub}
         >
           <DeviceScreen config={config} testMode={testMode} />
         </Panel>
-        <Panel className="panel-tr" title="Layout" subtitle="Drag, resize and arrange pieces of the screen">
+        <Panel className="panel-tr" title={t.layout} subtitle={t.layoutSub}>
           <LayoutEditor
             layout={config.layout}
             theme={config.theme}
@@ -45,10 +52,10 @@ export default function App(): React.JSX.Element {
             onReset={() => update((c) => ({ ...c, layout: DEFAULT_CONFIG.layout }))}
           />
         </Panel>
-        <Panel className="panel-bl" title="Create with AI" subtitle="Describe something new for your Splat Pad">
+        <Panel className="panel-bl" title={t.createWithAi} subtitle={t.createWithAiSub}>
           <AiPanel config={config} update={update} />
         </Panel>
-        <Panel className="panel-br" title="Library" subtitle="Apps, pieces, controls, colors and options">
+        <Panel className="panel-br" title={t.library} subtitle={t.librarySub}>
           <Library config={config} update={update} />
         </Panel>
 
@@ -57,5 +64,6 @@ export default function App(): React.JSX.Element {
 
       <NoticeToast notice={settings.notice} onClose={settings.clearNotice} />
     </div>
+    </LanguageProvider>
   )
 }

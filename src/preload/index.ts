@@ -18,6 +18,7 @@ contextBridge.exposeInMainWorld('splatPad', {
   loadConfig: () => ipcRenderer.invoke('config-load'),
   saveConfig: (config: unknown) => ipcRenderer.invoke('config-save', config),
   setUnsaved: (value: boolean) => ipcRenderer.send('set-unsaved', value),
+  setLanguage: (language: string) => ipcRenderer.send('set-language', language),
   showConfigFile: () => ipcRenderer.send('show-config-file'),
   closeWindow: () => ipcRenderer.send('close-window'),
   // The close dialog's "Save" button; returns a function that stops listening.

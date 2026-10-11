@@ -8,25 +8,26 @@ import {
   type Widget,
   type WidgetType
 } from '../../../shared/config'
+import type { Strings } from '../../../shared/i18n'
 
 // Plain-language summary of what an app tile does, e.g. "Spotify → Volume 40%".
-export function describeStep(step: MacroStep, config: Config): string {
+export function describeStep(step: MacroStep, config: Config, t: Strings): string {
   switch (step.type) {
     case 'openApp':
-      return `Open ${config.apps.find((a) => a.id === step.appId)?.name ?? 'app'}`
+      return t.openApp(config.apps.find((a) => a.id === step.appId)?.name ?? t.appFallback)
     case 'url':
       return step.target.replace(/^https?:\/\/(www\.)?/i, '')
     case 'setSlider':
-      return `${config.sliders.find((s) => s.id === step.sliderId)?.label ?? 'Slider'} ${step.value}%`
+      return `${config.sliders.find((s) => s.id === step.sliderId)?.label ?? t.sliderFallback} ${step.value}%`
   }
 }
 
-export function describeAction(action: AppAction, config: Config): string {
+export function describeAction(action: AppAction, config: Config, t: Strings): string {
   switch (action.type) {
     case 'none':
-      return 'Does nothing yet'
+      return t.doesNothing
     case 'macro':
-      return action.steps.map((s) => describeStep(s, config)).join(' → ')
+      return action.steps.map((s) => describeStep(s, config, t)).join(' → ')
     default:
       return action.target
   }

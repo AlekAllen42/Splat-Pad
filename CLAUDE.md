@@ -66,6 +66,9 @@ Window layout:
 ## Tech decisions
 - Electron + TypeScript, React + Vite via electron-vite.
 - electron-vite 5 requires Vite 7 (not 8); keep them matched when upgrading.
+- Languages: English, Spanish, French. ALL user-visible text lives in
+  src/shared/i18n.ts (never hard-code text in components; use useT()).
+  Spanish/French are machine translations: native review before selling.
 - `serialport` for USB serial, `electron-builder` + `electron-updater` for
   packaging and updates. Ask before adding other large dependencies.
 - Config is one JSON file. The same file will later be copied to the

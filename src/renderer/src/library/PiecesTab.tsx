@@ -1,21 +1,16 @@
 import { useState } from 'react'
 import type { Config, WidgetType } from '../../../shared/config'
-import { WIDGET_NAMES } from '../editor/LayoutEditor'
+import { useT } from '../i18n'
 import { Stepper } from './controls'
 import { DEFAULT_WIDGET_SIZE, makeId, placeWidget, type ConfigUpdate } from './helpers'
 
-const PIECES: { type: WidgetType; description: string }[] = [
-  { type: 'carousel', description: 'Your apps, drifting in a loop' },
-  { type: 'clock', description: 'Time and date' },
-  { type: 'favorites', description: 'Big buttons for your ★ apps' },
-  { type: 'presets', description: 'One-tap slider settings' },
-  { type: 'controls', description: 'Opens the sliders panel' }
-]
+const PIECES: WidgetType[] = ['carousel', 'clock', 'favorites', 'presets', 'controls']
 
 const MAX_PER_TYPE = 4
 
 export default function PiecesTab({ config, update }: { config: Config; update: ConfigUpdate }): React.JSX.Element {
-  const [noRoom, setNoRoom] = useState<string | null>(null)
+  const t = useT()
+  const [noRoom, setNoRoom] = useState<WidgetType | null>(null)
   const count = (type: WidgetType): number => config.layout.filter((w) => w.type === type).length
 
   // Adding finds an empty spot; removing takes away the most recently added one of that kind.
@@ -24,7 +19,7 @@ export default function PiecesTab({ config, update }: { config: Config; update: 
     if (next > current.length) {
       const { w, h } = DEFAULT_WIDGET_SIZE[type]
       const { spot, fits } = placeWidget(config.layout, w, h)
-      setNoRoom(fits ? null : WIDGET_NAMES[type])
+      setNoRoom(fits ? null : type)
       update((c) => ({
         ...c,
         layout: [...c.layout, { id: makeId(type, c.layout.map((wgt) => wgt.id)), type, ...spot }]
@@ -38,28 +33,21 @@ export default function PiecesTab({ config, update }: { config: Config; update: 
 
   return (
     <div className="lib-tab">
-      <p className="lib-hint">
-        Choose how many of each piece is on the screen. New pieces go in an empty spot; arrange them in the Layout panel.
-      </p>
-      {noRoom && (
-        <p className="lib-warning">
-          The screen is full, so the new {noRoom} was placed in the top-left corner on top of something (shown in red).
-          Move or shrink pieces in the Layout panel to make room.
-        </p>
-      )}
+      <p className="lib-hint">{t.piecesHint}</p>
+      {noRoom && <p className="lib-warning">{t.screenFull(t.widget[noRoom])}</p>}
       <ul className="lib-list">
-        {PIECES.map((p) => (
-          <li key={p.type} className="lib-piece">
+        {PIECES.map((type) => (
+          <li key={type} className="lib-piece">
             <div className="lib-piece-text">
-              <strong>{WIDGET_NAMES[p.type]}</strong>
-              <span>{p.description}</span>
+              <strong>{t.widget[type]}</strong>
+              <span>{t.widgetDesc[type]}</span>
             </div>
             <Stepper
-              label={WIDGET_NAMES[p.type]}
-              value={count(p.type)}
+              label={t.widget[type]}
+              value={count(type)}
               min={0}
               max={MAX_PER_TYPE}
-              onChange={(n) => setCount(p.type, n)}
+              onChange={(n) => setCount(type, n)}
             />
           </li>
         ))}

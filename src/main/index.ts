@@ -6,6 +6,7 @@ import { findStarterApps, STARTER_IDS } from './starterApps'
 import { fetchSiteIcon } from './favicon'
 import { configPath, loadConfig, saveConfig } from './configStore'
 import { registerTestMode } from './testMode'
+import { registerLanguage, t } from './language'
 
 // Windows whose UI reported unsaved changes, and ones allowed to close anyway.
 const unsaved = new WeakSet<BrowserWindow>()
@@ -33,12 +34,12 @@ function createWindow(): void {
     e.preventDefault()
     const choice = dialog.showMessageBoxSync(win, {
       type: 'question',
-      buttons: ['Save', 'Don’t save', 'Cancel'],
+      buttons: [t().save, t().dontSave, t().cancel],
       defaultId: 0,
       cancelId: 2,
       title: 'Splat Pad',
-      message: 'Save your changes before closing?',
-      detail: 'If you don’t save, your changes since the last save will be lost.'
+      message: t().closeQuestion,
+      detail: t().closeDetail
     })
     if (choice === 0) {
       win.webContents.send('save-then-close') // the UI saves, then calls close-window
@@ -82,6 +83,7 @@ function registerConfigHandlers(): void {
 app.whenReady().then(() => {
   registerPickers()
   registerConfigHandlers()
+  registerLanguage()
   registerTestMode()
   ipcMain.handle('find-starter-apps', (_e, ids: unknown) =>
     findStarterApps(Array.isArray(ids) ? ids.filter((id): id is string => STARTER_IDS.includes(id)) : [])

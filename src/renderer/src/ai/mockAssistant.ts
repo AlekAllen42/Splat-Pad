@@ -6,11 +6,14 @@
 
 import type { AppTile, Config, MacroStep, Preset, Theme } from '../../../shared/config'
 import { makeId, TILE_COLORS } from '../library/helpers'
+import type { Strings } from '../../../shared/i18n'
+
+type ThemeKey = keyof Strings['themeName']
 
 export type Creation =
   | { kind: 'button'; app: Omit<AppTile, 'id'> }
   | { kind: 'preset'; preset: Omit<Preset, 'id'> }
-  | { kind: 'theme'; name: string; theme: Theme }
+  | { kind: 'theme'; name: ThemeKey; theme: Theme }
 
 export interface Reply {
   message: string
@@ -18,25 +21,40 @@ export interface Reply {
   idea?: boolean // couldn't build it; offer to send the idea for review
 }
 
-const THEMES: { words: string[]; name: string; theme: Theme }[] = [
-  { words: ['purple', 'grape', 'violet'], name: 'Grape', theme: { background: '#1a1325', surface: '#2a1f3d', accent: '#c084fc', text: '#f4eefc' } },
-  { words: ['pink', 'rose'], name: 'Rose', theme: { background: '#fff0f5', surface: '#ffd6e5', accent: '#db2777', text: '#3b0a1f' } },
-  { words: ['blue', 'midnight', 'navy'], name: 'Midnight', theme: { background: '#0f1115', surface: '#1c2029', accent: '#4f8cff', text: '#f2f3f5' } },
-  { words: ['green', 'mint', 'forest'], name: 'Mint', theme: { background: '#eef6f1', surface: '#d9ece1', accent: '#1f8a5b', text: '#11231a' } },
-  { words: ['sunset', 'orange', 'warm'], name: 'Sunset', theme: { background: '#fff4e6', surface: '#ffe0bd', accent: '#d9480f', text: '#3b1d0b' } },
-  { words: ['dark', 'black', 'night', 'ink'], name: 'Ink', theme: { background: '#15120e', surface: '#26211a', accent: '#ec6a40', text: '#f1eadf' } },
-  { words: ['light', 'paper', 'white', 'cream'], name: 'Paper', theme: { background: '#f6f3ec', surface: '#efe8d9', accent: '#e2562c', text: '#1b1711' } }
+// Keywords in English, Spanish and French (the demo only; the real AI will
+// understand any wording).
+const THEMES: { words: string[]; name: ThemeKey; theme: Theme }[] = [
+  { words: ['purple', 'grape', 'violet', 'morado', 'violeta', 'uva', 'raisin'], name: 'Grape', theme: { background: '#1a1325', surface: '#2a1f3d', accent: '#c084fc', text: '#f4eefc' } },
+  { words: ['pink', 'rose', 'rosa'], name: 'Rose', theme: { background: '#fff0f5', surface: '#ffd6e5', accent: '#db2777', text: '#3b0a1f' } },
+  { words: ['blue', 'midnight', 'navy', 'azul', 'medianoche', 'bleu', 'minuit'], name: 'Midnight', theme: { background: '#0f1115', surface: '#1c2029', accent: '#4f8cff', text: '#f2f3f5' } },
+  { words: ['green', 'mint', 'forest', 'verde', 'menta', 'vert', 'menthe'], name: 'Mint', theme: { background: '#eef6f1', surface: '#d9ece1', accent: '#1f8a5b', text: '#11231a' } },
+  { words: ['sunset', 'orange', 'warm', 'naranja', 'atardecer', 'coucher'], name: 'Sunset', theme: { background: '#fff4e6', surface: '#ffe0bd', accent: '#d9480f', text: '#3b1d0b' } },
+  { words: ['dark', 'black', 'night', 'ink', 'oscuro', 'negro', 'noche', 'sombre', 'noir', 'nuit'], name: 'Ink', theme: { background: '#15120e', surface: '#26211a', accent: '#ec6a40', text: '#f1eadf' } },
+  { words: ['light', 'paper', 'white', 'cream', 'claro', 'blanco', 'clair', 'blanc'], name: 'Paper', theme: { background: '#f6f3ec', surface: '#efe8d9', accent: '#e2562c', text: '#1b1711' } }
 ]
 
 const escape = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-const titleCase = (s: string): string => s.replace(/\b\w/g, (c) => c.toUpperCase())
+const titleCase = (s: string): string => s.replace(/(^|\s)(\p{L})/gu, (_m, sp: string, c: string) => sp + c.toUpperCase())
+
+// Whole-word match that also works with accented letters (\b doesn't).
+const hasWord = (text: string, words: string[]): boolean =>
+  words.some((w) => new RegExp(`(?<!\\p{L})${escape(w)}(?!\\p{L})`, 'iu').test(text))
+
+const THEME_WORDS = ['theme', 'color', 'colors', 'colour', 'colours', 'look', 'make it', 'tema', 'colores', 'hazlo', 'thème', 'couleur', 'couleurs', 'mets-le']
+const PRESET_WORDS = ['preset', 'mode', 'scene', 'setup', 'modo', 'ajuste', 'escena', 'préréglage', 'scène']
 
 // "called Focus" / "named Focus" / "Study mode" -> a name
 function findName(text: string): string | undefined {
-  const called = text.match(/\b(?:called|named)\s+["']?([\w ]{1,24}?)["']?(?:\s+(?:that|with|which|and)\b|[.,!]|$)/i)
+  const called = text.match(
+    /(?:called|named|llamad[oa]|appelée?|nommée?)\s+["'«]?([\p{L}\d ]{1,24}?)["'»]?(?:\s+(?:that|with|which|and|que|con|y|qui|avec|et)(?!\p{L})|[.,!]|$)/iu
+  )
   if (called) return titleCase(called[1].trim())
-  const mode = text.match(/\b(?:a|an|my)\s+([a-z]+)\s+(?:mode|preset|scene|setup)\b/i)
-  if (mode) return titleCase(mode[1])
+  // "a study mode" (English: name before the word)
+  const before = text.match(/(?:^|\s)(?:a|an|my)\s+(\p{L}+)\s+(?:mode|preset|scene|setup)(?!\p{L})/iu)
+  if (before) return titleCase(before[1])
+  // "un modo estudio" / "un mode étude" (Spanish/French: name after the word)
+  const after = text.match(/(?:^|\s)(?:un|mi|mon)\s+(?:modo|mode)\s+(?:de\s+)?(\p{L}+)/iu)
+  if (after) return titleCase(after[1])
   return undefined
 }
 
@@ -45,10 +63,10 @@ function findSliderValues(text: string, config: Config): Record<string, number> 
   const values: Record<string, number> = {}
   for (const s of config.sliders) {
     const words = [s.label.toLowerCase()]
-    if (s.kind === 'masterVolume') words.push('volume', 'sound')
-    if (s.kind === 'brightness') words.push('brightness')
+    if (s.kind === 'masterVolume') words.push('volume', 'sound', 'volumen', 'sonido', 'son')
+    if (s.kind === 'brightness') words.push('brightness', 'brillo', 'luminosité')
     for (const w of words) {
-      const m = text.match(new RegExp(`\\b${escape(w)}\\b\\D{0,12}?(\\d{1,3})\\s*%?`, 'i'))
+      const m = text.match(new RegExp(`(?<!\\p{L})${escape(w)}(?!\\p{L})\\D{0,14}?(\\d{1,3})\\s*%?`, 'iu'))
       if (m) {
         values[s.id] = Math.min(100, Number(m[1]))
         break
@@ -66,16 +84,16 @@ const findUrls = (text: string): string[] =>
     /^https?:\/\//i.test(m[1]) ? m[1] : `https://${m[1]}`
   )
 
-export function respond(input: string, config: Config): Reply {
+export function respond(input: string, config: Config, t: Strings): Reply {
   const text = input.toLowerCase().trim()
-  if (!text) return { message: 'Tell me what you’d like your Splat Pad to do.' }
+  if (!text) return { message: t.aiEmpty }
 
   // Colors and themes
-  if (/\b(theme|colou?rs?|look|make it)\b/.test(text)) {
-    const match = THEMES.find((t) => t.words.some((w) => text.includes(w)))
+  if (hasWord(text, THEME_WORDS)) {
+    const match = THEMES.find((th) => hasWord(text, th.words))
     if (match) {
       return {
-        message: `Here’s a ${match.name} look for your screen.`,
+        message: t.aiTheme(t.themeName[match.name]),
         creation: { kind: 'theme', name: match.name, theme: match.theme }
       }
     }
@@ -87,10 +105,10 @@ export function respond(input: string, config: Config): Reply {
   const name = findName(input)
 
   // Presets: slider settings only, asked for as a mode/preset/scene
-  if (/\b(preset|mode|scene|setup)\b/.test(text) && Object.keys(values).length > 0 && apps.length === 0 && urls.length === 0) {
+  if (hasWord(text, PRESET_WORDS) && Object.keys(values).length > 0 && apps.length === 0 && urls.length === 0) {
     return {
-      message: 'Here’s a preset with those slider settings. Tap it on the screen to apply them all at once.',
-      creation: { kind: 'preset', preset: { name: name ?? 'New preset', values } }
+      message: t.aiPreset,
+      creation: { kind: 'preset', preset: { name: name ?? t.aiNewPreset, values } }
     }
   }
 
@@ -107,12 +125,9 @@ export function respond(input: string, config: Config): Reply {
       (onlyUrl
         ? titleCase(urls[0].replace(/^https?:\/\/(www\.)?/i, '').split(/[./]/)[0])
         : [...apps.map((a) => a.name), ...urls.map((u) => u.replace(/^https?:\/\/(www\.)?/i, '').split('.')[0])].slice(0, 2).join(' + ') ||
-          'My button')
+          t.aiMyButton)
     return {
-      message:
-        steps.length === 1
-          ? 'Here’s a button for that.'
-          : `Here’s a custom button that does ${steps.length} things in a row with one tap.`,
+      message: steps.length === 1 ? t.aiButtonOne : t.aiButtonMany(steps.length),
       creation: {
         kind: 'button',
         app: {
@@ -124,11 +139,7 @@ export function respond(input: string, config: Config): Reply {
     }
   }
 
-  return {
-    message:
-      'I can’t build that with what Splat Pad can do yet. I can make buttons that open apps and websites and set sliders, presets, and color themes. Want to send this idea to 42 Potential? They review ideas and may add them as features or presets for everyone.',
-    idea: true
-  }
+  return { message: t.aiCantBuild, idea: true }
 }
 
 // Adds a creation to the settings.

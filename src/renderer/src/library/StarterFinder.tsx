@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { removeApp, type Config } from '../../../shared/config'
 import type { ConfigUpdate } from './helpers'
+import { useT } from '../i18n'
 
 // Starter apps that came with the default settings (see DEFAULT_CONFIG).
 const STARTER_IDS = ['browser', 'spotify', 'discord', 'obs', 'steam', 'code', 'files', 'terminal']
@@ -10,6 +11,7 @@ type Results = Record<string, PickedProgram | null>
 // Offers to link the placeholder starter apps to real programs on this PC.
 // Searching changes nothing; the user ticks what to link/remove and clicks Apply.
 export default function StarterFinder({ config, update }: { config: Config; update: ConfigUpdate }): React.JSX.Element | null {
+  const t = useT()
   const [state, setState] = useState<'idle' | 'searching' | 'results'>('idle')
   const [results, setResults] = useState<Results>({})
   const [chosen, setChosen] = useState<Record<string, boolean>>({})
@@ -50,17 +52,13 @@ export default function StarterFinder({ config, update }: { config: Config; upda
   if (state !== 'results') {
     return (
       <div className="lib-starter">
-        <p>
-          {unlinked.length} starter {unlinked.length === 1 ? 'app isn’t' : 'apps aren’t'} linked to a program yet, so{' '}
-          {unlinked.length === 1 ? 'it shows' : 'they show'} letters. Look for them on this PC? Nothing changes until you
-          approve.
-        </p>
+        <p>{t.starterIntro(unlinked.length)}</p>
         <div className="lib-actions">
           <button className="btn btn-small btn-primary" disabled={state === 'searching'} onClick={search}>
-            {state === 'searching' ? 'Searching…' : 'Find these on my PC'}
+            {state === 'searching' ? t.searching : t.findOnPc}
           </button>
           <button className="btn btn-small" onClick={() => setDismissed(true)}>
-            Not now
+            {t.notNow}
           </button>
         </div>
       </div>
@@ -70,7 +68,7 @@ export default function StarterFinder({ config, update }: { config: Config; upda
   const count = Object.values(chosen).filter(Boolean).length
   return (
     <div className="lib-starter">
-      <p>Here’s what I found. Tick what you want, then Apply.</p>
+      <p>{t.starterFound}</p>
       <ul className="lib-list">
         {unlinked.map((app) => {
           const program = results[app.id]
@@ -84,13 +82,13 @@ export default function StarterFinder({ config, update }: { config: Config; upda
                 />
                 {program ? (
                   <>
-                    <span>Link {app.name} →</span>
+                    <span>{t.link(app.name)}</span>
                     {program.icon && <img src={program.icon} alt="" />}
                     <strong>{program.name}</strong>
                   </>
                 ) : (
                   <span>
-                    Remove {app.name} <em>(not found on this PC)</em>
+                    {t.removeNamed(app.name)} <em>{t.notFound}</em>
                   </span>
                 )}
               </label>
@@ -100,10 +98,10 @@ export default function StarterFinder({ config, update }: { config: Config; upda
       </ul>
       <div className="lib-actions">
         <button className="btn btn-small btn-primary" disabled={count === 0} onClick={apply}>
-          Apply{count ? ` (${count})` : ''}
+          {t.apply(count)}
         </button>
         <button className="btn btn-small" onClick={() => setDismissed(true)}>
-          Cancel
+          {t.cancel}
         </button>
       </div>
     </div>

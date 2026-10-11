@@ -7,13 +7,14 @@ import ColorsTab from './ColorsTab'
 import OptionsTab from './OptionsTab'
 import type { ConfigUpdate } from './helpers'
 import './library.css'
+import { useT } from '../i18n'
 
 const TABS = [
-  { id: 'apps', label: 'Apps', Component: AppsTab },
-  { id: 'pieces', label: 'Pieces', Component: PiecesTab },
-  { id: 'controls', label: 'Controls', Component: ControlsTab },
-  { id: 'colors', label: 'Colors', Component: ColorsTab },
-  { id: 'options', label: 'Options', Component: OptionsTab }
+  { id: 'apps', label: 'tabApps', Component: AppsTab },
+  { id: 'pieces', label: 'tabPieces', Component: PiecesTab },
+  { id: 'controls', label: 'tabControls', Component: ControlsTab },
+  { id: 'colors', label: 'tabColors', Component: ColorsTab },
+  { id: 'options', label: 'tabOptions', Component: OptionsTab }
 ] as const
 
 type TabId = (typeof TABS)[number]['id']
@@ -31,27 +32,28 @@ function loadTab(): TabId {
 
 export default function Library({ config, update }: { config: Config; update: ConfigUpdate }): React.JSX.Element {
   const [tab, setTab] = useState<TabId>(loadTab)
-  const Active = TABS.find((t) => t.id === tab)!.Component
+  const t = useT()
+  const Active = TABS.find((x) => x.id === tab)!.Component
 
   return (
     <div className="library">
       <div className="lib-tabs" role="tablist">
-        {TABS.map((t) => (
+        {TABS.map((x) => (
           <button
-            key={t.id}
+            key={x.id}
             role="tab"
-            aria-selected={tab === t.id}
-            className={tab === t.id ? 'is-on' : ''}
+            aria-selected={tab === x.id}
+            className={tab === x.id ? 'is-on' : ''}
             onClick={() => {
-              setTab(t.id)
+              setTab(x.id)
               try {
-                localStorage.setItem(STORAGE_KEY, t.id)
+                localStorage.setItem(STORAGE_KEY, x.id)
               } catch {
                 // not fatal
               }
             }}
           >
-            {t.label}
+            {t[x.label]}
           </button>
         ))}
       </div>

@@ -1,11 +1,13 @@
 import type { Config, TileShape } from '../../../shared/config'
+import { Row, Segmented, Stepper, Toggle } from './controls'
+import type { ConfigUpdate } from './helpers'
+import { useT } from '../i18n'
 
 const SHAPES: TileShape[] = ['square', 'circle', 'rectangle']
 const randomShape = (): TileShape => SHAPES[Math.floor(Math.random() * SHAPES.length)]
-import { Row, Segmented, Stepper, Toggle } from './controls'
-import type { ConfigUpdate } from './helpers'
 
 export default function OptionsTab({ config, update }: { config: Config; update: ConfigUpdate }): React.JSX.Element {
+  const t = useT()
   const { clock, carousel, behavior } = config
   const setClock = (patch: Partial<Config['clock']>): void => update((c) => ({ ...c, clock: { ...c.clock, ...patch } }))
   const setCarousel = (patch: Partial<Config['carousel']>): void =>
@@ -16,26 +18,26 @@ export default function OptionsTab({ config, update }: { config: Config; update:
   return (
     <div className="lib-tab">
       <section className="lib-section">
-        <h3>App tiles</h3>
-        <Row label="Show">
+        <h3>{t.appTiles}</h3>
+        <Row label={t.show}>
           <Segmented
             value={config.tiles.style}
             options={[
-              { value: 'imageName', label: 'Image + name' },
-              { value: 'image', label: 'Image only' },
-              { value: 'letterName', label: 'Letter + name' }
+              { value: 'imageName', label: t.styleImageName },
+              { value: 'image', label: t.styleImage },
+              { value: 'letterName', label: t.styleLetterName }
             ]}
             onChange={(style) => update((c) => ({ ...c, tiles: { ...c.tiles, style } }))}
           />
         </Row>
-        <Row label="Shape">
+        <Row label={t.shape}>
           <Segmented
             value={config.tiles.shape}
             options={[
-              { value: 'square', label: 'Square' },
-              { value: 'circle', label: 'Circle' },
-              { value: 'rectangle', label: 'Rectangle' },
-              { value: 'mixed', label: 'Mixed' }
+              { value: 'square', label: t.shapeName.square },
+              { value: 'circle', label: t.shapeName.circle },
+              { value: 'rectangle', label: t.shapeName.rectangle },
+              { value: 'mixed', label: t.shapeMixed }
             ]}
             onChange={(shape) =>
               update((c) => ({
@@ -49,75 +51,73 @@ export default function OptionsTab({ config, update }: { config: Config; update:
           />
         </Row>
         {config.tiles.shape === 'mixed' && (
-          <p className="lib-hint">Shapes were picked at random. Click Mixed again to reshuffle, or set each app’s shape in the Apps tab.</p>
+          <p className="lib-hint">{t.mixedHint}</p>
         )}
-        {config.tiles.shape === 'rectangle' && <p className="lib-hint">Rectangles are two columns wide.</p>}
-        <Row label="Tile boxes">
+        {config.tiles.shape === 'rectangle' && <p className="lib-hint">{t.rectangleHint}</p>}
+        <Row label={t.tileBoxes}>
           <Segmented
             value={config.tiles.showBoxes ? 'show' : 'hide'}
             options={[
-              { value: 'show', label: 'Show' },
-              { value: 'hide', label: 'Hide' }
+              { value: 'show', label: t.show },
+              { value: 'hide', label: t.hide }
             ]}
             onChange={(v) => update((c) => ({ ...c, tiles: { ...c.tiles, showBoxes: v === 'show' } }))}
           />
         </Row>
-        <p className="lib-hint">
-          Apps without an image show their first letter. With boxes hidden, you still tap the same square area.
-        </p>
+        <p className="lib-hint">{t.tilesHint}</p>
       </section>
 
       <section className="lib-section">
-        <h3>Clock</h3>
-        <Row label="Format">
+        <h3>{t.clock}</h3>
+        <Row label={t.format}>
           <Segmented
             value={clock.format}
             options={[
-              { value: '12h', label: '12-hour' },
-              { value: '24h', label: '24-hour' }
+              { value: '12h', label: t.hour12 },
+              { value: '24h', label: t.hour24 }
             ]}
             onChange={(format) => setClock({ format })}
           />
         </Row>
-        <Toggle label="Show seconds" checked={clock.showSeconds} onChange={(showSeconds) => setClock({ showSeconds })} />
-        <Toggle label="Show date" checked={clock.showDate} onChange={(showDate) => setClock({ showDate })} />
-        <Toggle label="Show 42 Potential logo" checked={clock.showLogo} onChange={(showLogo) => setClock({ showLogo })} />
+        <Toggle label={t.showSeconds} checked={clock.showSeconds} onChange={(showSeconds) => setClock({ showSeconds })} />
+        <Toggle label={t.showDate} checked={clock.showDate} onChange={(showDate) => setClock({ showDate })} />
+        <Toggle label={t.showLogo} checked={clock.showLogo} onChange={(showLogo) => setClock({ showLogo })} />
       </section>
 
       <section className="lib-section">
-        <h3>App carousel</h3>
-        <Row label="Columns">
-          <Stepper label="columns" value={carousel.columns} min={1} max={4} onChange={(columns) => setCarousel({ columns })} />
+        <h3>{t.appCarousel}</h3>
+        <Row label={t.columns}>
+          <Stepper label={t.columnsWord} value={carousel.columns} min={1} max={4} onChange={(columns) => setCarousel({ columns })} />
         </Row>
-        <Row label="Drift speed">
+        <Row label={t.driftSpeed}>
           <input
             type="range"
             min={0}
             max={80}
             value={carousel.speed}
-            aria-label="Drift speed"
+            aria-label={t.driftSpeed}
             onChange={(e) => setCarousel({ speed: Number(e.target.value) })}
           />
-          <span className="lib-value">{carousel.speed === 0 ? 'Still' : `${carousel.speed} px/s`}</span>
+          <span className="lib-value">{carousel.speed === 0 ? t.still : `${carousel.speed} px/s`}</span>
         </Row>
-        <Row label="Direction">
+        <Row label={t.direction}>
           <Segmented
             value={carousel.direction}
             options={[
-              { value: 'up', label: 'Up' },
-              { value: 'down', label: 'Down' }
+              { value: 'up', label: t.up },
+              { value: 'down', label: t.down }
             ]}
             onChange={(direction) => setCarousel({ direction })}
           />
         </Row>
-        <Row label="Resume after">
+        <Row label={t.resumeAfter}>
           <input
             type="range"
             min={0}
             max={10000}
             step={500}
             value={carousel.resumeDelayMs}
-            aria-label="Resume drifting after"
+            aria-label={t.resumeAfterLabel}
             onChange={(e) => setCarousel({ resumeDelayMs: Number(e.target.value) })}
           />
           <span className="lib-value">{(carousel.resumeDelayMs / 1000).toFixed(1)} s</span>
@@ -125,9 +125,9 @@ export default function OptionsTab({ config, update }: { config: Config; update:
       </section>
 
       <section className="lib-section">
-        <h3>Extras</h3>
+        <h3>{t.extras}</h3>
         <Toggle
-          label='Show "Opening …" message when an app is tapped'
+          label={t.openMessageOption}
           checked={behavior.showOpenMessage}
           onChange={(showOpenMessage) => setBehavior({ showOpenMessage })}
         />

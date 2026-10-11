@@ -27,6 +27,7 @@ interface Window {
     loadConfig: () => Promise<{ config: import('../../shared/config').Config | null; warning?: string }>
     saveConfig: (config: unknown) => Promise<{ ok: true } | { ok: false; errors: string[] }>
     setUnsaved: (value: boolean) => void
+    setLanguage: (language: string) => void
     showConfigFile: () => void
     closeWindow: () => void
     onSaveThenClose: (callback: () => void) => () => void

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { tileShapeOf, type AppTile, type ClockSettings, type Preset, type Slider, type TileSettings } from '../../../shared/config'
 import Tile from './Tile'
+import { useT } from '../i18n'
 // TODO(hardware): the device will need this logo as an image file on the microSD card.
 import logo from '../assets/logo.svg'
 
@@ -23,7 +24,8 @@ export function Clock({ settings, w, h }: { settings: ClockSettings; w: number; 
     `${settings.format === '24h' ? pad(hours) : hours}:${pad(now.getMinutes())}` +
     (settings.showSeconds ? `:${pad(now.getSeconds())}` : '')
   const ampm = settings.format === '12h' ? (now.getHours() < 12 ? 'AM' : 'PM') : ''
-  const date = now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })
+  const t = useT()
+  const date = now.toLocaleDateString(t.locale, { weekday: 'long', month: 'long', day: 'numeric' })
 
   // Size the digits to fit the box: limited by both height and width.
   const hasSide = !!ampm || settings.showLogo // the column right of the digits
@@ -78,13 +80,14 @@ export function Favorites({
   pressedId: string | null
   onPress: (app: AppTile) => void
 }): React.JSX.Element {
+  const t = useT()
   const gap = 12
   // a double-wide tile counts as two
   const units = Math.max(1, apps.reduce((n, a) => n + (tileShapeOf(a, tiles) === 'rectangle' ? 2 : 1), 0))
   const size = Math.max(20, Math.floor(Math.min(h, (w - gap * (units - 1)) / units)))
   return (
     <div className="dev-favorites" style={{ gap }}>
-      {apps.length === 0 && <span className="dev-empty">No favorites yet</span>}
+      {apps.length === 0 && <span className="dev-empty">{t.noFavorites}</span>}
       {apps.map((app) => (
         <button key={app.id} className="dev-plain" onClick={() => onPress(app)}>
           <Tile
@@ -113,11 +116,12 @@ export function Presets({
   activeId: string | null
   onApply: (preset: Preset) => void
 }): React.JSX.Element {
+  const t = useT()
   return (
     <div className="dev-presets">
-      <div className="dev-label">Presets</div>
+      <div className="dev-label">{t.devPresets}</div>
       <div className="dev-presets-list">
-        {presets.length === 0 && <span className="dev-empty">No presets yet</span>}
+        {presets.length === 0 && <span className="dev-empty">{t.noPresets}</span>}
         {presets.map((p) => (
           <button
             key={p.id}
@@ -148,8 +152,9 @@ function SlidersIcon({ size }: { size: number }): React.JSX.Element {
 }
 
 export function ControlsButton({ w, h, onOpen }: { w: number; h: number; onOpen: () => void }): React.JSX.Element {
+  const t = useT()
   return (
-    <button className="dev-btn dev-controls" onClick={onOpen} aria-label="Show sliders">
+    <button className="dev-btn dev-controls" onClick={onOpen} aria-label={t.showSliders}>
       <SlidersIcon size={Math.min(w, h) * 0.45} />
     </button>
   )
@@ -205,17 +210,18 @@ export function SliderPanel({
   onChange: (id: string, v: number) => void
   onClose: () => void
 }): React.JSX.Element {
+  const t = useT()
   return (
     <>
       <div className={`dev-scrim ${open ? 'is-open' : ''}`} onClick={onClose} />
       <div className={`dev-slider-panel ${open ? 'is-open' : ''}`} aria-hidden={!open}>
         <div className="dev-slider-panel-head">
-          <span className="dev-label">Controls</span>
-          <button className="dev-btn dev-close" onClick={onClose} aria-label="Hide sliders">
+          <span className="dev-label">{t.devControls}</span>
+          <button className="dev-btn dev-close" onClick={onClose} aria-label={t.hideSliders}>
             ✕
           </button>
         </div>
-        {sliders.length === 0 && <span className="dev-empty">No sliders yet</span>}
+        {sliders.length === 0 && <span className="dev-empty">{t.noSliders}</span>}
         {sliders.map((s) => (
           <SliderRow key={s.id} slider={s} value={values[s.id] ?? 50} onChange={(v) => onChange(s.id, v)} />
         ))}

@@ -4,6 +4,7 @@ import { readableOn } from '../device/Tile'
 import { ColorInput } from './controls'
 import { attachSiteIcon, describeAction, makeId, TILE_COLORS, type ConfigUpdate } from './helpers'
 import StarterFinder from './StarterFinder'
+import { useT } from '../i18n'
 
 function AppRow({
   app,
@@ -26,13 +27,14 @@ function AppRow({
   onMove: (dir: -1 | 1) => void
   onRemove: () => void
 }): React.JSX.Element {
-  const target = describeAction(app.action, config)
+  const t = useT()
+  const target = describeAction(app.action, config, t)
   return (
     <li className="lib-app">
       <button
         className="lib-app-icon"
         style={{ background: app.color, color: readableOn(app.color) }}
-        title="Change icon"
+        title={t.changeIcon}
         onClick={async () => {
           const icon = await window.splatPad.pickImage()
           if (icon) onChange({ ...app, icon })
@@ -44,7 +46,7 @@ function AppRow({
         <input
           className="lib-input lib-app-name"
           value={app.name}
-          aria-label="App name"
+          aria-label={t.appName}
           onChange={(e) => onChange({ ...app, name: e.target.value })}
         />
         <span className="lib-app-target" title={target}>
@@ -55,32 +57,32 @@ function AppRow({
         <select
           className="lib-input lib-shape"
           value={app.shape ?? 'square'}
-          aria-label={`Shape of ${app.name}`}
-          title="Tile shape"
+          aria-label={t.shapeOf(app.name)}
+          title={t.tileShape}
           onChange={(e) => onChange({ ...app, shape: e.target.value as TileShape })}
         >
-          <option value="square">■ Square</option>
-          <option value="circle">● Circle</option>
-          <option value="rectangle">▬ Wide</option>
+          <option value="square">{t.shapeSquare}</option>
+          <option value="circle">{t.shapeCircle}</option>
+          <option value="rectangle">{t.shapeWide}</option>
         </select>
       )}
-      <ColorInput label="Tile color" value={app.color} onChange={(color) => onChange({ ...app, color })} />
+      <ColorInput label={t.tileColor} value={app.color} onChange={(color) => onChange({ ...app, color })} />
       <button
         className={`lib-icon-btn lib-star ${favorite ? 'is-on' : ''}`}
-        aria-label={favorite ? 'Remove from favorites' : 'Add to favorites'}
+        aria-label={favorite ? t.removeFavorite : t.addFavorite}
         aria-pressed={favorite}
-        title="Favorite"
+        title={t.favorite}
         onClick={onToggleFavorite}
       >
         ★
       </button>
-      <button className="lib-icon-btn" aria-label="Move up" disabled={isFirst} onClick={() => onMove(-1)}>
+      <button className="lib-icon-btn" aria-label={t.moveUp} disabled={isFirst} onClick={() => onMove(-1)}>
         ↑
       </button>
-      <button className="lib-icon-btn" aria-label="Move down" disabled={isLast} onClick={() => onMove(1)}>
+      <button className="lib-icon-btn" aria-label={t.moveDown} disabled={isLast} onClick={() => onMove(1)}>
         ↓
       </button>
-      <button className="lib-icon-btn lib-remove" aria-label={`Remove ${app.name}`} onClick={onRemove}>
+      <button className="lib-icon-btn lib-remove" aria-label={t.removeNamed(app.name)} onClick={onRemove}>
         ✕
       </button>
     </li>
@@ -88,6 +90,7 @@ function AppRow({
 }
 
 export default function AppsTab({ config, update }: { config: Config; update: ConfigUpdate }): React.JSX.Element {
+  const t = useT()
   const [webForm, setWebForm] = useState<{ name: string; url: string } | null>(null)
 
   const addApp = (fields: Omit<AppTile, 'id' | 'color'>): void =>
@@ -141,12 +144,12 @@ export default function AppsTab({ config, update }: { config: Config; update: Co
     <div className="lib-tab">
       <div className="lib-actions">
         <button className="btn btn-small btn-primary" onClick={addProgram}>
-          + Add program
+          {t.addProgram}
         </button>
         <button className="btn btn-small" onClick={() => setWebForm({ name: '', url: '' })}>
-          + Add website
+          {t.addWebsite}
         </button>
-        <span className="lib-count">{config.apps.length} apps</span>
+        <span className="lib-count">{t.appCount(config.apps.length)}</span>
       </div>
 
       {webForm && (
@@ -159,7 +162,7 @@ export default function AppsTab({ config, update }: { config: Config; update: Co
         >
           <input
             className="lib-input"
-            placeholder="Name (optional)"
+            placeholder={t.nameOptional}
             value={webForm.name}
             onChange={(e) => setWebForm({ ...webForm, name: e.target.value })}
           />
@@ -172,17 +175,17 @@ export default function AppsTab({ config, update }: { config: Config; update: Co
             onChange={(e) => setWebForm({ ...webForm, url: e.target.value })}
           />
           <button className="btn btn-small btn-primary" type="submit">
-            Add
+            {t.add}
           </button>
           <button className="btn btn-small" type="button" onClick={() => setWebForm(null)}>
-            Cancel
+            {t.cancel}
           </button>
         </form>
       )}
 
       <StarterFinder config={config} update={update} />
 
-      <p className="lib-hint">Click an icon to choose your own image. ★ adds an app to the Favorites piece.</p>
+      <p className="lib-hint">{t.appsHint}</p>
 
       <ul className="lib-list">
         {config.apps.map((app, i) => (

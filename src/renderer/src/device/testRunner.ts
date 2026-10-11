@@ -1,40 +1,45 @@
 import type { AppTile, Config, Slider } from '../../../shared/config'
+import type { Strings } from '../../../shared/i18n'
 
 // Test mode: performs a tile's action on this PC and returns short messages
 // describing what happened, for the live screen to show.
 
 const MAX_DEPTH = 3 // custom buttons can open other buttons; stop runaway loops
 
-export async function runSlider(slider: Slider, value: number): Promise<string> {
+export async function runSlider(slider: Slider, value: number, t: Strings): Promise<string> {
   if (slider.kind === 'masterVolume') {
-    return (await window.splatPad.setVolume(value)) ? `Volume ${value}%` : 'Couldn’t change the volume'
+    return (await window.splatPad.setVolume(value)) ? t.volumeSet(value) : t.volumeFailed
   }
-  return `${slider.label} → ${value}% (real control comes in Phase 3)`
+  return t.phase3Slider(slider.label, value)
 }
 
-export async function runApp(app: AppTile, config: Config, depth = 0): Promise<string[]> {
-  if (depth > MAX_DEPTH) return ['Stopped: buttons opening each other too deeply']
+export async function runApp(app: AppTile, config: Config, t: Strings, depth = 0): Promise<string[]> {
+  if (depth > MAX_DEPTH) return [t.tooDeep]
   const action = app.action
   switch (action.type) {
     case 'none':
-      return [`${app.name} isn’t linked to a program yet`]
+      return [t.notLinked(app.name)]
     case 'launch':
     case 'url': {
       const r = await window.splatPad.testOpen(action.type, action.target)
-      return [r.ok ? `Opened ${app.name}` : `Couldn’t open ${app.name}: ${r.error ?? 'unknown error'}`]
+      return [r.ok ? t.opened(app.name) : t.couldntOpen(app.name, r.error ?? t.unknownError)]
     }
     case 'macro': {
       const messages: string[] = []
       for (const step of action.steps) {
         if (step.type === 'openApp') {
           const target = config.apps.find((a) => a.id === step.appId)
-          messages.push(...(target ? await runApp(target, config, depth + 1) : ['A step’s app was removed']))
+          messages.push(...(target ? await runApp(target, config, t, depth + 1) : [t.stepAppRemoved]))
         } else if (step.type === 'url') {
           const r = await window.splatPad.testOpen('url', step.target)
-          messages.push(r.ok ? `Opened ${step.target.replace(/^https?:\/\/(www\.)?/i, '')}` : `Couldn’t open ${step.target}`)
+          messages.push(
+            r.ok
+              ? t.opened(step.target.replace(/^https?:\/\/(www\.)?/i, ''))
+              : t.couldntOpen(step.target, t.unknownError)
+          )
         } else {
           const slider = config.sliders.find((s) => s.id === step.sliderId)
-          if (slider) messages.push(await runSlider(slider, step.value))
+          if (slider) messages.push(await runSlider(slider, step.value, t))
         }
       }
       return messages

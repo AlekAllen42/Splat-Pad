@@ -103,8 +103,13 @@ export interface BehaviorSettings {
   showOpenMessage: boolean // brief "Opening Spotify" message when an app is tapped
 }
 
+// Language for the app window and the device screen.
+export type Language = 'en' | 'es' | 'fr'
+export const LANGUAGES: Language[] = ['en', 'es', 'fr']
+
 export interface Config {
   version: number
+  language: Language
   theme: Theme
   clock: ClockSettings
   carousel: CarouselSettings
@@ -119,6 +124,7 @@ export interface Config {
 
 export const DEFAULT_CONFIG: Config = {
   version: CONFIG_VERSION,
+  language: 'en',
   // 42 Potential brand colors
   theme: {
     background: '#f6f3ec',
@@ -171,6 +177,7 @@ const SECTIONS = ['theme', 'clock', 'carousel', 'tiles', 'behavior'] as const
 export function upgradeConfig(raw: unknown): unknown {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return raw
   const c = { ...(raw as Record<string, unknown>) }
+  if (c.language === undefined) c.language = DEFAULT_CONFIG.language
   for (const key of SECTIONS) {
     const value = c[key]
     if (value === undefined) c[key] = DEFAULT_CONFIG[key]
@@ -269,6 +276,8 @@ export function validateConfig(raw: unknown): ValidationResult {
 
   if (raw.version !== CONFIG_VERSION)
     err('version', `must be ${CONFIG_VERSION} (this app doesn't understand version ${String(raw.version)})`)
+
+  oneOf(raw.language, 'language', LANGUAGES)
 
   const theme = isObj(raw.theme) ? raw.theme : (err('theme', 'missing'), {})
   for (const key of ['background', 'surface', 'accent', 'text'] as const)
